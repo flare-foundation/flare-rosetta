@@ -1,80 +1,80 @@
 # ------------------------------------------------------------------------------
-# Build avalanche
+# Build go-flare
 # ------------------------------------------------------------------------------
-FROM golang:1.18.1 AS avalanche
+FROM golang:1.18 AS flare
 
-ARG AVALANCHE_VERSION
+WORKDIR /app
+ENV ROCKSDBALLOWED=1
+ARG GO_FLARE_VERSION=v0.7.0
 
-RUN git clone https://github.com/ava-labs/avalanchego.git \
-  /go/src/github.com/ava-labs/avalanchego
+RUN git clone --branch "$GO_FLARE_VERSION" https://github.com/flare-foundation/go-flare .
 
-WORKDIR /go/src/github.com/ava-labs/avalanchego
-
-RUN git checkout $AVALANCHE_VERSION && \
+RUN apt update && \
+    apt -y install rsync
+RUN cd avalanchego && \
     ./scripts/build.sh
 
 # ------------------------------------------------------------------------------
-# Build avalanche rosetta
+# Build flare-rosetta
 # ------------------------------------------------------------------------------
-FROM golang:1.18.1 AS rosetta
+FROM golang:1.18 AS rosetta
 
-ARG ROSETTA_VERSION
+ARG ROSETTA_VERSION=main
 
-RUN git clone https://github.com/ava-labs/avalanche-rosetta.git \
-  /go/src/github.com/ava-labs/avalanche-rosetta
+WORKDIR /app
 
-WORKDIR /go/src/github.com/ava-labs/avalanche-rosetta
+ENV CGO_ENABLED=1 \
+    GOARCH=amd64 \
+    GOOS=linux
 
-ENV CGO_ENABLED=1
-ENV GOARCH=amd64
-ENV GOOS=linux
+RUN git clone --branch "$ROSETTA_VERSION" https://github.com/flare-foundation/flare-rosetta .
 
-RUN git checkout $ROSETTA_VERSION && \
-    go mod download
+WORKDIR /app/server
 
 RUN \
   GO_VERSION=$(go version | awk {'print $3'}) \
-  GIT_COMMIT=$(git rev-parse HEAD) \
+  GIT_COMMIT=main \
+  go mod download && \
+  make setup && \
   make build
 
 # ------------------------------------------------------------------------------
-# Target container for running the node and rosetta server
+# Target container for running the rosetta server
 # ------------------------------------------------------------------------------
 FROM ubuntu:20.04
 
 # Install dependencies
 RUN apt-get update -y && \
-    apt-get install -y wget
+    apt -y upgrade && \
+    apt -y install curl jq netcat dnsutils
 
 WORKDIR /app
 
-# Install avalanche daemon
-COPY --from=avalanche \
-  /go/src/github.com/ava-labs/avalanchego/build/avalanchego \
-  /app/avalanchego
-
-# Install evm plugin
-COPY --from=avalanche \
-  /go/src/github.com/ava-labs/avalanchego/build/plugins/evm \
-  /app/plugins/evm
+# Install flare
+ENV HTTP_PORT=9650 \
+    STAKING_PORT=9651 \
+    DB_DIR=/app/flare/db \
+    DB_TYPE=leveldb \
+    LOG_DIR=/app/flare/logs \
+    LOG_LEVEL=info
+      
+COPY --from=flare /app/avalanchego/build /app/flare/build
 
 # Install rosetta server
-COPY --from=rosetta \
-  /go/src/github.com/ava-labs/avalanche-rosetta/rosetta-server \
-  /app/rosetta-server
+COPY --from=rosetta /app/server /app/rosetta-server
 
-# Install rosetta runner
-COPY --from=rosetta \
-  /go/src/github.com/ava-labs/avalanche-rosetta/rosetta-runner \
-  /app/rosetta-runner
+# Install node and rosetta configs
+COPY --from=rosetta /app/server/rosetta-cli-conf /app/conf
 
-# Install service start script
-COPY --from=rosetta \
-  /go/src/github.com/ava-labs/avalanche-rosetta/docker/entrypoint.sh \
-  /app/entrypoint.sh
+# Install entrypoints
+COPY --from=rosetta /app/server/docker/entrypoint_flare.sh /app/entrypoint_flare.sh
+COPY --from=rosetta /app/server/docker/entrypoint_rosetta.sh /app/entrypoint_rosetta.sh
+COPY --from=rosetta /app/server/docker/entrypoint_main.sh /app/entrypoint_main.sh
+
+RUN chmod +x entrypoint_flare.sh entrypoint_rosetta.sh entrypoint_main.sh
 
 EXPOSE 9650
 EXPOSE 9651
 EXPOSE 8080
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint_main.sh"]
