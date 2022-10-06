@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Build go-flare
 # ------------------------------------------------------------------------------
-FROM golang:1.18 AS flare
+FROM golang:1.18.5 AS flare
 
 WORKDIR /app
 ENV ROCKSDBALLOWED=1
@@ -17,7 +17,7 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 # Build flare-rosetta
 # ------------------------------------------------------------------------------
-FROM golang:1.18 AS rosetta
+FROM golang:1.18.5 AS rosetta
 
 ARG ROSETTA_VERSION=main
 
