@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -eo pipefail
-set -o xtrace
+#set -o xtrace
 
 NETWORK_ID=$1
 
