@@ -88,3 +88,24 @@ check:data
 ```
 ./scripts/rosetta-cli.sh flare data
 ```
+
+# Build and run the Docker image
+
+The Docker image contains the node and rosetta-server.
+
+```
+cd server
+docker build --progress=plain -t flarefoundation/flare-rosetta:latest .
+```
+
+Run for Flare network:
+```
+docker run -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/flare/db:/app/flare/db flarefoundation/flare-rosetta:latest
+```
+
+Run for Costwo network:
+```
+docker run -p 18080:8080 -p 19650:9650 -p 19651:9651 -v /my/costwo/db:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+```
+
+Specify network id as first docker run argument. If you want to preserve the node database, mount a local host directory to `/app/flare/db`.
