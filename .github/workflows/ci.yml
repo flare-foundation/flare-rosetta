@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: 
+      - main
+  pull_request:
+
+env:
+  go_version: 1.18.5
+
+jobs:
+  Rosetta-Validation:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.18.5
+
+    - name: Start go-flare node
+      run: .github/scripts/runner.sh
+      shell: bash
+
+    - name: Test node stability
+      run: |
+        curl http://localhost:9650/ext/health
+      shell: bash
+
+    - name: Start Rosetta Server
+      run: .github/scripts/setup.sh
+      shell: bash
+
+    - name: Run rosetta-cli check:construction
+      run: .github/scripts/cli.sh
+      shell: bash
+
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.go_version }}
+      - run: (cd server && make build)
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.go_version }}
+      - run: (cd server && make test)
