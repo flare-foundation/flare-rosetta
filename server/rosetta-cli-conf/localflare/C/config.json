@@ -1,0 +1,26 @@
+{
+    "snowman-api-enabled": true,
+    "coreth-admin-api-enabled": true,
+    "pruning-enabled": false,
+    "offline-pruning-enabled": false,
+    "allow-missing-tries": false,
+    "log-level": "info",
+    "eth-apis": [
+        "eth",
+        "eth-filter",
+        "admin",
+        "debug",
+        "debug-tracer",
+        "debug-handler",
+        "net",
+        "web3",
+        "debug",
+        "internal-eth",
+        "internal-blockchain",
+        "internal-transaction",
+        "internal-tx-pool",
+        "internal-debug",
+        "internal-account",
+        "internal-personal"
+    ]
+}

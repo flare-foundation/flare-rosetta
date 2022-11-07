@@ -1,0 +1,11 @@
+[
+    {
+        "account_identifier": {
+            "address": "0x000000000000000000000000000000000000dEaD"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    }
+]
