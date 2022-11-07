@@ -93,6 +93,9 @@ func main() {
 	case mapper.CostwoChainID:
 		assetID = mapper.CostwoAssetID
 		AP5Activation = uint64(0)
+	case mapper.LocalFlareChainID:
+		assetID = mapper.LocalFlareAssetID
+		AP5Activation = uint64(0)
 	default:
 		log.Fatal("invalid ChainID:", cfg.ChainID)
 	}

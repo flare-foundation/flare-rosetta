@@ -13,6 +13,9 @@ const (
 	CostwoChainID = 114
 	CostwoAssetID = "fxMAKpBQQpFedrUhWMsDYfCUJxdUw4mneTczKBzNg3rc2JUub"
 
+	LocalFlareChainID = 162
+	LocalFlareAssetID = "QJx3BomP9MGxCy5RPVXyNUeEqzduvuNbxQVXMuPKDakacdY6K"
+
 	ContractAddressMetadata  = "contractAddress"
 	IndexTransferredMetadata = "indexTransferred"
 
