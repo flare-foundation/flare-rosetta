@@ -10,13 +10,12 @@ Dockerfile builds the components from source, uses multi-stage builds and is ind
 
 **Flare**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/host/dir/flare/db:/app/flare/db flarefoundation/flare-rosetta:latest
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=online -v /my/host/dir/flare/db:/app/flare/db flarefoundation/flare-rosetta:latest
 ```
-Be aware that your IP needs to be whitelisted in order to connect to the flare network at this time.
 
 **Coston2**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/host/dir/costwo/db:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=online -v /my/host/dir/costwo/db:/app/flare/db flarefoundation/flare-rosetta:latest costwo
 ```
 
 You can override the default configuration files by mounting to `/app/conf`. See `server/rosetta-cli-conf` in flare-rosetta repo for the expected folder structure.
