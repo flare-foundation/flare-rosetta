@@ -73,9 +73,9 @@ COPY --from=rosetta /app/server/docker/entrypoint_rosetta.sh /app/entrypoint_ros
 COPY --from=rosetta /app/server/docker/entrypoint_main.sh /app/entrypoint_main.sh
 
 # For local dev only
-COPY ./docker/entrypoint_flare.sh /app/entrypoint_flare.sh
-COPY ./docker/entrypoint_rosetta.sh /app/entrypoint_rosetta.sh
-COPY ./docker/entrypoint_main.sh /app/entrypoint_main.sh
+#COPY ./docker/entrypoint_flare.sh /app/entrypoint_flare.sh
+#COPY ./docker/entrypoint_rosetta.sh /app/entrypoint_rosetta.sh
+#COPY ./docker/entrypoint_main.sh /app/entrypoint_main.sh
 
 RUN chmod +x entrypoint_flare.sh entrypoint_rosetta.sh entrypoint_main.sh
 

@@ -2,6 +2,11 @@
 
 NETWORK_ID=$1
 
+if [ "$MODE" != "online" ] && [ "$MODE" != "offline" ]; then
+    echo "No valid argument was passed for mode, using default: online"
+    MODE="online"
+fi
+
 if [ "$NETWORK_ID" = "flare" ]; then
 cat <<EOF > /app/conf/flare/server-config.json
 {
