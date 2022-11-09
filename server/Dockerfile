@@ -5,7 +5,7 @@ FROM golang:1.18.5 AS flare
 
 WORKDIR /app
 ENV ROCKSDBALLOWED=1
-ARG GO_FLARE_VERSION=v0.7.0
+ARG GO_FLARE_VERSION=v0.7.1
 
 RUN git clone --branch "$GO_FLARE_VERSION" https://github.com/flare-foundation/go-flare .
 
@@ -56,7 +56,8 @@ ENV HTTP_PORT=9650 \
     DB_DIR=/app/flare/db \
     DB_TYPE=leveldb \
     LOG_DIR=/app/flare/logs \
-    LOG_LEVEL=info
+    LOG_LEVEL=info \
+    MODE=online
       
 COPY --from=flare /app/avalanchego/build /app/flare/build
 
@@ -70,6 +71,11 @@ COPY --from=rosetta /app/server/rosetta-cli-conf /app/conf
 COPY --from=rosetta /app/server/docker/entrypoint_flare.sh /app/entrypoint_flare.sh
 COPY --from=rosetta /app/server/docker/entrypoint_rosetta.sh /app/entrypoint_rosetta.sh
 COPY --from=rosetta /app/server/docker/entrypoint_main.sh /app/entrypoint_main.sh
+
+# For local dev only
+#COPY ./docker/entrypoint_flare.sh /app/entrypoint_flare.sh
+#COPY ./docker/entrypoint_rosetta.sh /app/entrypoint_rosetta.sh
+#COPY ./docker/entrypoint_main.sh /app/entrypoint_main.sh
 
 RUN chmod +x entrypoint_flare.sh entrypoint_rosetta.sh entrypoint_main.sh
 

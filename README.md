@@ -91,21 +91,40 @@ check:data
 
 # Build and run the Docker image
 
-The Docker image contains the node and rosetta-server.
+The Docker image contains a go-flare node and rosetta-server.
 
 ```
 cd server
 docker build --progress=plain -t flarefoundation/flare-rosetta:latest .
 ```
 
-Run for Flare network:
+Runtime environment variables
+
+| Name          | Type    | Default | Description
+|---------------|---------|---------|-------------------------------------------
+| MODE          | string  | `online` | Mode of operations. One of: `online`, `offline`
+
+**Flare**
 ```
-docker run -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/flare/db:/app/flare/db flarefoundation/flare-rosetta:latest
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/host/dir/flare/db:/app/flare/db flarefoundation/flare-rosetta:latest
 ```
 
-Run for Costwo network:
+**Coston2**
 ```
-docker run -p 18080:8080 -p 19650:9650 -p 19651:9651 -v /my/costwo/db:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=offline -v /my/host/dir/costwo/db:/app/flare/db flarefoundation/flare-rosetta:latest costwo
 ```
 
-Specify network id as first docker run argument. If you want to preserve the node database, mount a local host directory to `/app/flare/db`.
+You can override the default configuration files by mounting to `/app/conf`. See `server/rosetta-cli-conf` for the expected folder structure.
+
+`server-config.json` is generated at runtime and will be overwritten if mounted.
+
+You can find more information on running a go-flare node in our [official documentation](https://docs.flare.network/infra/observation/deploying/).
+
+**Offline and online node**
+
+```
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=online -v /my/host/dir/costwo/db_online:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e MODE=offline -v /my/host/dir/costwo/db_offline:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+```
+
+Modify cli config in `server/rosetta-cli-conf/config.json -> construction.offline_url` to point to the offline node.

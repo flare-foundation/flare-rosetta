@@ -20,5 +20,3 @@ data
 .vscode*
 __debug_bin*
 build_docker.sh
-run_flare.sh
-run_costwo.sh
