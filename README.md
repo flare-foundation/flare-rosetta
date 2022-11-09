@@ -103,6 +103,7 @@ Runtime environment variables
 | Name          | Type    | Default | Description
 |---------------|---------|---------|-------------------------------------------
 | MODE          | string  | `online` | Mode of operations. One of: `online`, `offline`
+| START_ROSETTA_SERVER_AFTER_BOOTSTRAP          | bool  | `false` | Waits for go-flare to fully bootstrap before launching rosetta-server
 
 **Flare**
 ```

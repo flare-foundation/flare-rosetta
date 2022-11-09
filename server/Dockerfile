@@ -57,7 +57,8 @@ ENV HTTP_PORT=9650 \
     DB_TYPE=leveldb \
     LOG_DIR=/app/flare/logs \
     LOG_LEVEL=info \
-    MODE=online
+    MODE=online \
+    START_ROSETTA_SERVER_AFTER_BOOTSTRAP=false
       
 COPY --from=flare /app/avalanchego/build /app/flare/build
 
