@@ -23,7 +23,7 @@ FROM golang:1.18.5 AS rosetta
 ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/main.zip
 ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-main
 
-WORKDIR /app
+WORKDIR /tmp
 
 ENV CGO_ENABLED=1 \
     GOARCH=amd64 \
