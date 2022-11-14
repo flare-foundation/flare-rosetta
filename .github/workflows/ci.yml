@@ -45,7 +45,7 @@ jobs:
     - name: Build and push container image
       shell: bash
       run: |
-        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }} .
+        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }} -f ./server/Dockerfile .
         docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
   test-container:
     runs-on: ubuntu-latest
