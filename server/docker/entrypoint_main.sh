@@ -16,7 +16,7 @@ trap cleanup SIGINT
 
 ./entrypoint_rosetta.sh | sed -e 's/^/[rosetta]: /;' &
 PID_ENTRYPOINT_ROSETTA=$!
-./entrypoint_flare-localflare.sh | sed -e 's/^/[go-flare]: /;' &
+./entrypoint_flare.sh | sed -e 's/^/[go-flare]: /;' &
 PID_ENTRYPOINT_FLARE=$!
 
 # Wait for any process to exit

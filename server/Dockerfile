@@ -99,7 +99,6 @@ COPY --from=rosetta /app/server/rosetta-cli-conf /app/conf
 
 # Install entrypoints
 COPY --from=rosetta /app/server/docker/entrypoint_flare.sh /app/entrypoint_flare.sh
-COPY --from=rosetta /app/server/docker/entrypoint_flare-localflare.sh /app/entrypoint_flare-localflare.sh
 COPY --from=rosetta /app/server/docker/entrypoint_rosetta.sh /app/entrypoint_rosetta.sh
 COPY --from=rosetta /app/server/docker/entrypoint_main.sh /app/entrypoint_main.sh
 COPY --from=rosetta /app/server/docker/healthcheck.sh /app/healthcheck.sh
