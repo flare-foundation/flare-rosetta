@@ -68,6 +68,10 @@ jobs:
           --health-timeout 15s
           --health-retries 10
           --health-start-period 30s
+    strategy:
+      fail-fast: false
+      matrix:
+        check_construction_timeout: [5, 10, 15, 20, 30, 40, 50, 60]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -106,12 +110,18 @@ jobs:
         curl -o /tmp/rosetta/install.sh -sSfL https://raw.githubusercontent.com/coinbase/rosetta-cli/d5ccb7c5cdfc60cd23ff7cb010dea1bf19f80547/scripts/install.sh
         bash /tmp/rosetta/install.sh -b /tmp/rosetta/
     - name: Run rosetta-cli check:construction
-      timeout-minutes: 10
+      timeout-minutes: ${{ matrix.check_construction_timeout }}
       shell: bash
       run: |
         pushd server/rosetta-cli-conf/localflare
         /tmp/rosetta/rosetta-cli --configuration-file=./config.json check:construction
         popd
+
+
+
+
+
+
   test-make_build:
     runs-on: ubuntu-latest
     steps:
