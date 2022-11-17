@@ -107,12 +107,12 @@ Runtime environment variables
 
 **Flare**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/host/dir/flare/db:/app/flare/db flarefoundation/flare-rosetta:latest
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/host/dir/flare/db:/data flarefoundation/flare-rosetta:latest
 ```
 
 **Coston2**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=offline -v /my/host/dir/costwo/db:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=offline -v /my/host/dir/costwo/db:/data flarefoundation/flare-rosetta:latest costwo
 ```
 
 You can override the default configuration files by mounting to `/app/conf`. See `server/rosetta-cli-conf` for the expected folder structure.
@@ -124,8 +124,8 @@ You can find more information on running a go-flare node in our [official docume
 **Offline and online node**
 
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=online -v /my/host/dir/costwo/db_online:/app/flare/db flarefoundation/flare-rosetta:latest costwo
-docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e MODE=offline -v /my/host/dir/costwo/db_offline:/app/flare/db flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=online -v /my/host/dir/costwo/db_online:/data flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e MODE=offline -v /my/host/dir/costwo/db_offline:/data flarefoundation/flare-rosetta:latest costwo
 ```
 
 Modify cli config in `server/rosetta-cli-conf/config.json -> construction.offline_url` to point to the offline node.
