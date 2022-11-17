@@ -2,11 +2,6 @@
 
 NETWORK_ID=$1
 
-if [ "$MODE" != "online" ] && [ "$MODE" != "offline" ]; then
-    echo "No valid argument was passed for MODE, using default: online"
-    MODE="online"
-fi
-
 if [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" != "true" ] && [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" != "false" ]; then
     echo "No valid argument was passed for START_ROSETTA_SERVER_AFTER_BOOTSTRAP, using default: false"
     START_ROSETTA_SERVER_AFTER_BOOTSTRAP=false
@@ -34,17 +29,19 @@ cat <<EOF > /app/conf/costwo/server-config.json
 EOF
 fi
 
-while true
-do
-    STATUS=$(curl -m 10 -s -w %{http_code} http://127.0.0.1:9650/ext/health -o /dev/null)
-    if [ $STATUS = "200" ]; then
-        break
-    elif [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" = "false" ] && [ $STATUS = "503" ]; then
-        break     
-    else
-        echo "[rosetta-start-script] Node RPC not ready yet, got response status $STATUS"
-        sleep 5
-    fi
-done
+if [ "$MODE" = "online" ]; then
+    while true
+    do
+        STATUS=$(curl -m 10 -s -w %{http_code} http://127.0.0.1:9650/ext/health -o /dev/null)
+        if [ $STATUS = "200" ]; then
+            break
+        elif [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" = "false" ] && [ $STATUS = "503" ]; then
+            break     
+        else
+            echo "[rosetta-start-script] Node RPC not ready yet, got response status $STATUS"
+            sleep 5
+        fi
+    done
+fi
 
 /app/rosetta-server/rosetta-server -config=/app/conf/$NETWORK_ID/server-config.json
