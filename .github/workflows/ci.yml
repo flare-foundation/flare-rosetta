@@ -93,6 +93,11 @@ jobs:
         sed -i 's/localhost/127.0.0.1/g' /tmp/test_pchain_import.sh
         sed -i 's/ | jq .//g' /tmp/test_pchain_import.sh
         bash /tmp/test_pchain_import.sh
+        while [[ "$(curl -X POST --data '{ "jsonrpc": "2.0", "method": "platform.getHeight", "params": {}, "id": 1 }' -H 'content-type:application/json;' 127.0.0.1:9650/ext/bc/P | jq -r .result.height)" != "2" ]]
+        do
+          echo "Block height not reached.. Block Height:" $(curl -X POST --data '{ "jsonrpc": "2.0", "method": "platform.getHeight", "params": {}, "id": 1 }' -H 'content-type:application/json;' 127.0.0.1:9650/ext/bc/P | jq -r .result.height)
+          sleep 1
+        done
     - name: Wait for rosetta to bind to port
       shell: bash
       run: curl -s --retry 6 --retry-delay 10 --retry-connrefused http://localhost:8080 || exit 1
