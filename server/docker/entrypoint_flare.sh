@@ -26,7 +26,9 @@ if [ "$STAKING_ENABLED" = "false" ] && [ "$YES_I_REALLY_KNOW_WHAT_I_AM_DOING" !=
 	exit 1
 fi
 
-
+if [ "$FLARE_LOCAL_TXS_ENABLED" = "true" ]; then
+	jq '.local-txs-enabled=true' "${CHAIN_CONFIG_DIR}/C/config.json" | sponge "${CHAIN_CONFIG_DIR}/C/config.json"
+fi
 
 if [ ! -z "$AUTOCONFIGURE_BOOTSTRAP_ENDPOINT" ];
 then
