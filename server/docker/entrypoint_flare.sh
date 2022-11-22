@@ -27,7 +27,7 @@ if [ "$STAKING_ENABLED" = "false" ] && [ "$YES_I_REALLY_KNOW_WHAT_I_AM_DOING" !=
 fi
 
 if [ "$FLARE_LOCAL_TXS_ENABLED" = "true" ]; then
-	jq --arg v "true" '.local-txs-enabled=$v' "${CHAIN_CONFIG_DIR}/C/config.json" | sponge "${CHAIN_CONFIG_DIR}/C/config.json"
+	jq --argjson var "true" '."local-txs-enabled"=$var' "${CHAIN_CONFIG_DIR}/C/config.json" | sponge "${CHAIN_CONFIG_DIR}/C/config.json"
 fi
 
 if [ ! -z "$AUTOCONFIGURE_BOOTSTRAP_ENDPOINT" ];
