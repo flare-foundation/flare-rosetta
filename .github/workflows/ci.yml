@@ -62,6 +62,7 @@ jobs:
         env:
           DEBUG: true
           NETWORK_ID: localflare
+          FLARE_LOCAL_TXS_ENABLED: true
           FLARE_EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
         options: >-
           --health-interval 15s
