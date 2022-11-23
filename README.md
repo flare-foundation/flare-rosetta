@@ -104,7 +104,7 @@ check:data
 | `DB_TYPE` | `leveldb` | The database type to be used |
 | `BOOTSTRAP_IPS` | _(empty)_ | A list of bootstrap server ips; ref [--bootstrap-ips-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ips-string) |
 | `BOOTSTRAP_IDS` | _(empty)_ | A list of bootstrap server ids; ref [--bootstrap-ids-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ids-string) |
-| `CHAIN_CONFIG_DIR` | `/app/flare/config/${NETWORK_ID}` | Chain configuration directory for flare. |
+| `CHAIN_CONFIG_DIR` | `/app/config/${NETWORK_ID}` | Chain configuration directory for flare |
 | `LOG_DIR` | `/app/logs` | Logging directory |
 | `LOG_LEVEL` | `warn` | [Logging level](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--log-level-string-verbo-debug-trace-info-warn-error-fatal-off). If explicitly set (not default) also overwrites `DEBUG` setting it to `debug`. |
 | `NETWORK_ID` | `costwo` | The network id. The common ids are `flare` and `costwo` |

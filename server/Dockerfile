@@ -77,7 +77,7 @@ ENV HTTP_HOST=0.0.0.0 \
 
 
 # Intentionally empty, so env vars are evalueted at runtime (script entrypoint_flare.sh) instead of build time
-# Default: /app/flare/config/$NETWORK_ID
+# Default: /app/config/$NETWORK_ID
 ENV CHAIN_CONFIG_DIR=""
 # Default: warn
 ENV LOG_LEVEL=""
