@@ -9,11 +9,6 @@ export ROSETTA_FLARE_ENDPOINT=${ROSETTA_FLARE_ENDPOINT:?'Env var ROSETTA_FLARE_E
 export ROSETTA_CONFIG_PATH=${ROSETTA_CONFIG_PATH:-/app/conf/$NETWORK_ID/server-config.json}
 
 
-if [ "$MODE" != "online" ] && [ "$MODE" != "offline" ]; then
-    echo "No valid argument was passed for MODE! Exiting..."
-    exit 1
-fi
-
 if [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" != "true" ] && [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" != "false" ]; then
     echo "No valid argument was passed for START_ROSETTA_SERVER_AFTER_BOOTSTRAP, using default: false"
     START_ROSETTA_SERVER_AFTER_BOOTSTRAP=false
@@ -42,6 +37,9 @@ do
     if [ $STATUS = "200" ]; then
         echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_ID', OK!"
         break
+    elif [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" = "false" ] && [ $STATUS = "503" ]; then
+        echo "[rosetta-start-script] Got status '$STATUS' but we are not waiting for flare to fully bootstrap, OK!"
+        break     
     elif [ $STATUS = "503" ] && [ $NETWORK_ID = "localflare" ]; then
         echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_ID', checking if because of no peers"
         is_because_of_no_peers=$(curl -s ${ROSETTA_FLARE_ENDPOINT}/ext/health | grep "network layer is unhealthy reason: not connected to a minimum of 1 peer")

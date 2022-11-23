@@ -64,7 +64,7 @@ WORKDIR /app
 ENV HTTP_HOST=0.0.0.0 \
     HTTP_PORT=9650 \
     STAKING_PORT=9651 \
-    DB_DIR=/app/flare/db \
+    DB_DIR=/data \
     DB_TYPE=leveldb \
     LOG_DIR=/app/flare/logs \
     MODE=online \

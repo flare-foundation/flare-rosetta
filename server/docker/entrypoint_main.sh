@@ -14,10 +14,20 @@ function cleanup ()
 
 trap cleanup SIGINT
 
+
+if [ "$MODE" != "online" ] && [ "$MODE" != "offline" ]; then
+    echo "An invalid value ('${MODE}') was provided for MODE env variable! Exiting..."
+    exit 1
+fi
+
+
+if [ "$MODE" = "online" ]; then
+    ./entrypoint_flare.sh | sed -e 's/^/[go-flare]: /;' &
+    PID_ENTRYPOINT_FLARE=$!
+fi
+
 ./entrypoint_rosetta.sh | sed -e 's/^/[rosetta]: /;' &
 PID_ENTRYPOINT_ROSETTA=$!
-./entrypoint_flare.sh | sed -e 's/^/[go-flare]: /;' &
-PID_ENTRYPOINT_FLARE=$!
 
 # Wait for any process to exit
 wait -n
