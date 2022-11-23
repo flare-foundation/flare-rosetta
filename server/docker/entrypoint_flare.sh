@@ -17,6 +17,12 @@ if [ "$NETWORK_ID" != "flare" ] && [ "$NETWORK_ID" != "costwo" ] && [ "$NETWORK_
     exit 1
 fi
 
+if [ "$NETWORK_ID" = "flare" ]; then
+	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://flare.flare.network/ext/info'}
+elif [ "$NETWORK_ID" = "costwo" ]; then
+	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://coston2.flare.network/ext/info'}
+fi
+
 if [ "$STAKING_ENABLED" = "false" ] && [ "$YES_I_REALLY_KNOW_WHAT_I_AM_DOING" != "i-have-read-the-documentation" ]; then
 	echo "<ERROR>"
 	echo "  STAKING_ENABLED env var is set to 'false'"
