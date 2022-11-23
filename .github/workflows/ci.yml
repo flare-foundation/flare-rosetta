@@ -45,7 +45,9 @@ jobs:
       run: |
         docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }} -f ./server/Dockerfile .
         docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
-  test-container:
+
+
+  test-container-localflare-online:
     runs-on: ubuntu-latest
     needs:
     - build-container
@@ -121,6 +123,55 @@ jobs:
         /tmp/rosetta/rosetta-cli --configuration-file=./config.json check:construction
         popd
 
+
+
+  test-container-localflare-offline:
+    runs-on: ubuntu-latest
+    needs:
+    - build-container
+    - define-env
+    services:
+      flare_node:
+        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
+        ports:
+          - 9650:9650
+          - 9651:9651
+          - 8080:8080
+        env:
+          DEBUG: true
+          NETWORK_NAME: localflare
+          FLARE_LOCAL_TXS_ENABLED: true
+          MODE: offline
+          FLARE_EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
+        options: >-
+          --health-interval 15s
+          --health-timeout 15s
+          --health-retries 10
+          --health-start-period 30s
+    strategy:
+      fail-fast: false
+      matrix:
+        index: [1, 2, 3, 4, 5]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ env.go_version }}
+    - run: sudo apt update -y && sudo apt install curl -y
+
+    - name: Wait for rosetta to bind to port
+      shell: bash
+      run: curl -s --retry 6 --retry-delay 10 --retry-connrefused http://localhost:8080 || exit 1
+
+    - name: List networks Rosetta API lists
+      shell: bash
+      run: |
+        curl -s --location --request POST 'http://127.0.0.1:8080/network/list' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{ "metadata" : {} }' \
+          --fail || exit 1
 
 
 
