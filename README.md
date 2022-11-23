@@ -141,7 +141,7 @@ Specify network id as first docker run argument. If you want to preserve the nod
 
 #### Disabling staking
 
-Disabling Proof od Stake is **dangerous**! Read the [avalanchego documentation](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean).
+Disabling Proof od Stake is **dangerous**! Read the [avalanchego documentation](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). If you want to proceed with disabled staking you will also need to [confirm this setting](#confirming-dangerous-settings) as it is a dangerous one.
 
 #### Confirming dangerous settings
 
