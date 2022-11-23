@@ -91,26 +91,6 @@ check:data
 
 # Run via Container
 
-# Build and run the Docker image
-
-The Docker image contains the node and rosetta-server.
-
-```
-docker build --progress=plain -t my-local-flare-rosetta-image .
-```
-
-Run for Flare network:
-```
-docker run -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=flare -v /my/flare/db:/app/flare/db my-local-flare-rosetta-image
-```
-
-Run for Costwo network:
-```
-docker run -p 18080:8080 -p 19650:9650 -p 19651:9651 -e NETWORK_ID=costwo -v /my/costwo/db:/app/flare/db my-local-flare-rosetta-image
-```
-
-Specify network id as first docker run argument. If you want to preserve the node database, mount a local host directory to `/app/flare/db`.
-
 ### Environment variables
 
 | Name | Default | Description |
@@ -124,7 +104,7 @@ Specify network id as first docker run argument. If you want to preserve the nod
 | `DB_TYPE` | `leveldb` | The database type to be used |
 | `BOOTSTRAP_IPS` | _(empty)_ | A list of bootstrap server ips; ref [--bootstrap-ips-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ips-string) |
 | `BOOTSTRAP_IDS` | _(empty)_ | A list of bootstrap server ids; ref [--bootstrap-ids-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ids-string) |
-| `CHAIN_CONFIG_DIR` | `/app/flare/config/${NETWORK_ID}` | Chain configuration directory for flare |
+| `CHAIN_CONFIG_DIR` | `/app/conf/${NETWORK_ID}` | Chain configuration directory for flare |
 | `LOG_DIR` | `/app/logs` | Logging directory |
 | `LOG_LEVEL` | `warn` | [Logging level](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--log-level-string-verbo-debug-trace-info-warn-error-fatal-off). If explicitly set (not default) also overwrites `DEBUG` setting it to `debug`. |
 | `NETWORK_ID` | `costwo` | The network id. The common ids are `flare` and `costwo` |
@@ -138,15 +118,32 @@ Specify network id as first docker run argument. If you want to preserve the nod
 | `MODE` | `online` | Run rosetta in [`online`](https://www.rosetta-api.org/docs/node_deployment.html#online-mode-endpoints) or [`offline`](https://www.rosetta-api.org/docs/node_deployment.html#offline-mode-endpoints) mode |
 | `START_ROSETTA_SERVER_AFTER_BOOTSTRAP` | `false` | Waits for go-flare to fully bootstrap before launching rosetta-server |
 
+### Ports
 
-#### Disabling staking
+| Default port | Used for | Configurable ? |
+|---|---|---|
+| `9650` | go-flare API | With `HTTP_PORT` env var |
+| `9651` | go-flare staking | With `STAKING_PORT` env var |
+| `8080` | rosetta API | No |
 
-Disabling Proof od Stake is **dangerous**! Read the [avalanchego documentation](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). If you want to proceed with disabled staking you will also need to [confirm this setting](#confirming-dangerous-settings) as it is a dangerous one.
+### Volumes
 
-#### Confirming dangerous settings
+| Default path | Used for | Configurable ? |
+|---|---|---|
+| `/data` | go-flare chain database | With `DB_DIR` env var |
+| `/app/logs` | go-flare logs | With `LOG_DIR` env var |
+| `/app/flare/config/${NETWORK_ID}` | go-flare configuration folder | With `CHAIN_CONFIG_DIR` env var |
+
+
+Config folders in [`rosetta-cli-conf`](./server/rosetta-cli-conf/) also contain the Rosetta server config `server-config.json`. The used location of this config file can be overwritted with `ROSETTA_CONFIG_PATH` environment variable.
+
+### Disabling staking
+
+Disabling Proof of Stake is **dangerous**! Read the [avalanchego documentation](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). If you want to proceed with disabled staking you will also need to [confirm this setting](#confirming-dangerous-settings) as it is a dangerous one.
+
+### Confirming dangerous settings
 
 To confirm dangrous settings set the environment variable `YES_I_REALLY_KNOW_WHAT_I_AM_DOING` to "i have read the documentation" with spaces replaced with minuses.
-
 
 
 
@@ -162,7 +159,6 @@ docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=offline -v /my/host
 
 You can override the default configuration files by mounting to `/app/conf`. See `server/rosetta-cli-conf` for the expected folder structure.
 
-`server-config.json` is generated at runtime and will be overwritten if mounted.
 
 You can find more information on running a go-flare node in our [official documentation](https://docs.flare.network/infra/observation/deploying/).
 

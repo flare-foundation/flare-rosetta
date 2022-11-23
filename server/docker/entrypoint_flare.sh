@@ -9,7 +9,7 @@ sleep 1
 
 
 export NETWORK_ID=${NETWORK_ID:?'Env var NETWORK_ID is required! Exiting...'}
-export CHAIN_CONFIG_DIR=${CHAIN_CONFIG_DIR:-/app/flare/config/${NETWORK_ID}}
+export CHAIN_CONFIG_DIR=${CHAIN_CONFIG_DIR:-/app/conf/${NETWORK_ID}}
 export LOG_LEVEL=${LOG_LEVEL:-warn}
 
 if [ "$NETWORK_ID" != "flare" ] && [ "$NETWORK_ID" != "costwo" ] && [ "$NETWORK_ID" != "localflare" ]; then
