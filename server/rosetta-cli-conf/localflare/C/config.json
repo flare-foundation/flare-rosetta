@@ -5,6 +5,7 @@
     "offline-pruning-enabled": false,
     "allow-missing-tries": false,
     "log-level": "info",
+    "local-txs-enabled": false,
     "eth-apis": [
         "eth",
         "eth-filter",
