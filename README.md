@@ -145,16 +145,21 @@ Disabling Proof of Stake is **dangerous**! Read the [avalanchego documentation](
 
 To confirm dangrous settings set the environment variable `YES_I_REALLY_KNOW_WHAT_I_AM_DOING` to "i have read the documentation" with spaces replaced with minuses.
 
+## Build image
 
+```
+cd server
+docker build --progress=plain -t my-local-flare-rosetta-image .
+```
 
 **Flare**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -v /my/host/dir/flare/db:/data flarefoundation/flare-rosetta:latest
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=flare -v /my/host/dir/flare/db:/data my-local-flare-rosetta-image
 ```
 
 **Coston2**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=offline -v /my/host/dir/costwo/db:/data flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=costwo -v /my/host/dir/costwo/db:/data my-local-flare-rosetta-image
 ```
 
 You can override the default configuration files by mounting to `/app/conf`. See `server/rosetta-cli-conf` for the expected folder structure.
@@ -165,8 +170,8 @@ You can find more information on running a go-flare node in our [official docume
 **Offline and online node**
 
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e MODE=online -v /my/host/dir/costwo/db_online:/data flarefoundation/flare-rosetta:latest costwo
-docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e MODE=offline -v /my/host/dir/costwo/db_offline:/data flarefoundation/flare-rosetta:latest costwo
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=costwo -e MODE=online -v /my/host/dir/costwo/db_online:/data my-local-flare-rosetta-image
+docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e NETWORK_ID=costwo -e MODE=offline -v /my/host/dir/costwo/db_offline:/data my-local-flare-rosetta-image
 ```
 
 Modify cli config in `server/rosetta-cli-conf/config.json -> construction.offline_url` to point to the offline node.
