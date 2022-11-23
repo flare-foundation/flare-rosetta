@@ -3,7 +3,7 @@
 set -eo pipefail
 if [ "$DEBUG" = "true" ]; then set -o xtrace; fi
 
-export NETWORK_ID=${NETWORK_ID:?"Env var NETWORK_ID is required!"}
+export NETWORK_NAME=${NETWORK_NAME:?"Env var NETWORK_NAME is required!"}
 
 if [ "$MODE" = "online" ]; then
 
@@ -12,7 +12,7 @@ if [ "$MODE" = "online" ]; then
     STATUS=$(curl -m 10 -s -w %{http_code} ${ROSETTA_FLARE_ENDPOINT}/ext/health -o /dev/null)
     if [ $STATUS = "200" ]; then
         echo "go-flare :: /ext/health :: ok"
-    elif [ $STATUS = "503" ] && [ $NETWORK_ID = "localflare" ]; then
+    elif [ $STATUS = "503" ] && [ $NETWORK_NAME = "localflare" ]; then
         echo "go-flare :: /ext/health :: 503-localflare" 
         is_because_of_no_peers=$(curl -s ${ROSETTA_FLARE_ENDPOINT}/ext/health | grep "network layer is unhealthy reason: not connected to a minimum of 1 peer")
         if [ -z is_because_of_no_peers ]; then

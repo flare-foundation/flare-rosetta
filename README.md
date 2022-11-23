@@ -104,16 +104,16 @@ check:data
 | `DB_TYPE` | `leveldb` | The database type to be used |
 | `BOOTSTRAP_IPS` | _(empty)_ | A list of bootstrap server ips; ref [--bootstrap-ips-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ips-string) |
 | `BOOTSTRAP_IDS` | _(empty)_ | A list of bootstrap server ids; ref [--bootstrap-ids-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ids-string) |
-| `CHAIN_CONFIG_DIR` | `/app/conf/${NETWORK_ID}` | Chain configuration directory for flare |
+| `CHAIN_CONFIG_DIR` | `/app/conf/${NETWORK_NAME}` | Chain configuration directory for flare |
 | `LOG_DIR` | `/app/logs` | Logging directory |
 | `LOG_LEVEL` | `warn` | [Logging level](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--log-level-string-verbo-debug-trace-info-warn-error-fatal-off). If explicitly set (not default) also overwrites `DEBUG` setting it to `debug`. |
-| `NETWORK_ID` | `costwo` | The network id. The common ids are `flare` and `costwo` |
+| `NETWORK_NAME` | `costwo` | The network id. The common ids are `flare` and `costwo` |
 | `AUTOCONFIGURE_BOOTSTRAP_ENDPOINT_RETRY` | `0` | How many times, with delay of 10 seconds, should we retry contacting the bootstrap node. Handy when a node will bootstrap from another parallel-start node. |
 | `AUTOCONFIGURE_BOOTSTRAP_ENDPOINT` | _(empty)_ | Endpoint used for [bootstrapping](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#bootstrapping). Ex. `https://coston2.flare.network/ext/info`, `https://flare.flare.network/ext/info` |
 | `FLARE_LOCAL_TXS_ENABLED` | `false` | Set to `true` when running a one-node setup (ex. localflare). Docs about [local-txs-enabled-boolean](https://docs.avax.network/nodes/maintain/chain-config-flags#local-txs-enabled-boolean). |
 | `FLARE_EXTRA_ARGUMENTS` | | Extra arguments passed to flare binary |
 | `ROSETTA_FLARE_ENDPOINT` | `http://127.0.0.1:9650` | go-flare HTTP endpoint used by rosetta |
-| `ROSETTA_CONFIG_PATH` | `/app/conf/${NETWORK_ID}/server-config.json` | Configuration path used by rosetta |
+| `ROSETTA_CONFIG_PATH` | `/app/conf/${NETWORK_NAME}/server-config.json` | Configuration path used by rosetta |
 | `STAKING_ENABLED` | `true` | set it to `false` to make avalanchego sample all nodes, not just validators. Read [Disabling staking](#disabling-staking)! Avalanchego docs: [--staking-enabled](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). |
 | `MODE` | `online` | Run rosetta in [`online`](https://www.rosetta-api.org/docs/node_deployment.html#online-mode-endpoints) or [`offline`](https://www.rosetta-api.org/docs/node_deployment.html#offline-mode-endpoints) mode |
 | `START_ROSETTA_SERVER_AFTER_BOOTSTRAP` | `false` | Waits for go-flare to fully bootstrap before launching rosetta-server |
@@ -132,7 +132,7 @@ check:data
 |---|---|---|
 | `/data` | go-flare chain database | With `DB_DIR` env var |
 | `/app/logs` | go-flare logs | With `LOG_DIR` env var |
-| `/app/flare/config/${NETWORK_ID}` | go-flare configuration folder | With `CHAIN_CONFIG_DIR` env var |
+| `/app/flare/config/${NETWORK_NAME}` | go-flare configuration folder | With `CHAIN_CONFIG_DIR` env var |
 
 
 Config folders in [`rosetta-cli-conf`](./server/rosetta-cli-conf/) also contain the Rosetta server config `server-config.json`. The used location of this config file can be overwritted with `ROSETTA_CONFIG_PATH` environment variable.
@@ -154,12 +154,12 @@ docker build --progress=plain -t my-local-flare-rosetta-image .
 
 **Flare**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=flare -v /my/host/dir/flare/db:/data my-local-flare-rosetta-image
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_NAME=flare -v /my/host/dir/flare/db:/data my-local-flare-rosetta-image
 ```
 
 **Coston2**
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=costwo -v /my/host/dir/costwo/db:/data my-local-flare-rosetta-image
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_NAME=costwo -v /my/host/dir/costwo/db:/data my-local-flare-rosetta-image
 ```
 
 You can override the default configuration files by mounting to `/app/conf`. See `server/rosetta-cli-conf` for the expected folder structure.
@@ -170,8 +170,8 @@ You can find more information on running a go-flare node in our [official docume
 **Offline and online node**
 
 ```
-docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_ID=costwo -e MODE=online -v /my/host/dir/costwo/db_online:/data my-local-flare-rosetta-image
-docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e NETWORK_ID=costwo -e MODE=offline -v /my/host/dir/costwo/db_offline:/data my-local-flare-rosetta-image
+docker run -d -p 8080:8080 -p 9650:9650 -p 9651:9651 -e NETWORK_NAME=costwo -e MODE=online -v /my/host/dir/costwo/db_online:/data my-local-flare-rosetta-image
+docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e NETWORK_NAME=costwo -e MODE=offline -v /my/host/dir/costwo/db_offline:/data my-local-flare-rosetta-image
 ```
 
 Modify cli config in `server/rosetta-cli-conf/config.json -> construction.offline_url` to point to the offline node.

@@ -4,9 +4,9 @@ set -eo pipefail
 if [ "$DEBUG" = "true" ]; then set -o xtrace; fi
 sleep 1 # REQUIRED! So the entrypoint_main.sh registers the wait -n before this one fails.
 
-export NETWORK_ID=${NETWORK_ID:?'Env var NETWORK_ID is required! Exiting...'}
+export NETWORK_NAME=${NETWORK_NAME:?'Env var NETWORK_NAME is required! Exiting...'}
 export ROSETTA_FLARE_ENDPOINT=${ROSETTA_FLARE_ENDPOINT:?'Env var ROSETTA_FLARE_ENDPOINT is required! Exiting...'}
-export ROSETTA_CONFIG_PATH=${ROSETTA_CONFIG_PATH:-/app/conf/$NETWORK_ID/server-config.json}
+export ROSETTA_CONFIG_PATH=${ROSETTA_CONFIG_PATH:-/app/conf/$NETWORK_NAME/server-config.json}
 
 
 if [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" != "true" ] && [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" != "false" ]; then
@@ -23,13 +23,13 @@ if [ "$MODE" = "online" ]; then
     do
         STATUS=$(curl -m 10 -s -w %{http_code} ${ROSETTA_FLARE_ENDPOINT}/ext/health -o /dev/null)
         if [ $STATUS = "200" ]; then
-            echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_ID', OK!"
+            echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_NAME', OK!"
             break
         elif [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" = "false" ] && [ $STATUS = "503" ]; then
             echo "[rosetta-start-script] Got status '$STATUS' but we are not waiting for flare to fully bootstrap, OK!"
             break     
-        elif [ $STATUS = "503" ] && [ $NETWORK_ID = "localflare" ]; then
-            echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_ID', checking if because of no peers"
+        elif [ $STATUS = "503" ] && [ $NETWORK_NAME = "localflare" ]; then
+            echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_NAME', checking if because of no peers"
             is_because_of_no_peers=$(curl -s ${ROSETTA_FLARE_ENDPOINT}/ext/health | grep "network layer is unhealthy reason: not connected to a minimum of 1 peer")
 
             if [ ! -z is_because_of_no_peers ]; then
@@ -37,7 +37,7 @@ if [ "$MODE" = "online" ]; then
                 break
             fi
         fi
-        echo "[rosetta-start-script] Node RPC not ready yet, got response status $STATUS on network id '$NETWORK_ID', retrying..."
+        echo "[rosetta-start-script] Node RPC not ready yet, got response status $STATUS on network id '$NETWORK_NAME', retrying..."
         sleep 1
     done
 

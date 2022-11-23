@@ -77,7 +77,7 @@ ENV HTTP_HOST=0.0.0.0 \
 
 
 # Intentionally empty, so env vars are evalueted at runtime (script entrypoint_flare.sh) instead of build time
-# Default: /app/conf/$NETWORK_ID
+# Default: /app/conf/$NETWORK_NAME
 ENV CHAIN_CONFIG_DIR=""
 # Default: warn
 ENV LOG_LEVEL=""
@@ -85,7 +85,7 @@ ENV LOG_LEVEL=""
 # ROSETTA ENV VARS
 ENV ROSETTA_FLARE_ENDPOINT=http://127.0.0.1:9650
 # Intentionally empty, so env vars are evalueted at runtime (script entrypoint_rosetta.sh) instead of build time
-# Default: /app/conf/$NETWORK_ID/server-config.json
+# Default: /app/conf/$NETWORK_NAME/server-config.json
 ENV ROSETTA_CONFIG_PATH=""
 
 # Install flare
