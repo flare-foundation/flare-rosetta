@@ -8,18 +8,18 @@ fi
 sleep 1
 
 
-export NETWORK_NAME=${NETWORK_NAME:?'Env var NETWORK_NAME is required! Exiting...'}
-export CHAIN_CONFIG_DIR=${CHAIN_CONFIG_DIR:-/app/conf/${NETWORK_NAME}}
+export NETWORK_ID=${NETWORK_ID:?'Env var NETWORK_ID is required! Exiting...'}
+export CHAIN_CONFIG_DIR=${CHAIN_CONFIG_DIR:-/app/conf/${NETWORK_ID}}
 export LOG_LEVEL=${LOG_LEVEL:-warn}
 
-if [ "$NETWORK_NAME" != "flare" ] && [ "$NETWORK_NAME" != "costwo" ] && [ "$NETWORK_NAME" != "localflare" ]; then
-    echo "NETWORK_NAME value '${NETWORK_NAME}' is not a valid network ID! Exiting..."
+if [ "$NETWORK_ID" != "flare" ] && [ "$NETWORK_ID" != "costwo" ] && [ "$NETWORK_ID" != "localflare" ]; then
+    echo "NETWORK_ID value '${NETWORK_ID}' is not a valid network ID! Exiting..."
     exit 1
 fi
 
-if [ "$NETWORK_NAME" = "flare" ]; then
+if [ "$NETWORK_ID" = "flare" ]; then
 	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://flare.flare.network/ext/info'}
-elif [ "$NETWORK_NAME" = "costwo" ]; then
+elif [ "$NETWORK_ID" = "costwo" ]; then
 	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://coston2.flare.network/ext/info'}
 fi
 
@@ -69,5 +69,5 @@ fi
 	--chain-config-dir=$CHAIN_CONFIG_DIR \
 	--log-dir=$LOG_DIR \
 	--log-level=$LOG_LEVEL \
-	--network-id=$NETWORK_NAME \
+	--network-id=$NETWORK_ID \
 	$FLARE_EXTRA_ARGUMENTS
