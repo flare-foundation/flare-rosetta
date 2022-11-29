@@ -52,6 +52,11 @@ jobs:
     needs:
     - build-container
     - define-env
+    strategy:
+      fail-fast: false
+      matrix:
+        index: [1, 2, 3, 4, 5]
+        START_ROSETTA_SERVER_AFTER_BOOTSTRAP: [true, false]
     services:
       flare_node:
         image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
@@ -63,16 +68,13 @@ jobs:
           DEBUG: true
           NETWORK_ID: localflare
           FLARE_LOCAL_TXS_ENABLED: true
+          START_ROSETTA_SERVER_AFTER_BOOTSTRAP: ${{ matrix.START_ROSETTA_SERVER_AFTER_BOOTSTRAP }}
           FLARE_EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
         options: >-
           --health-interval 15s
           --health-timeout 15s
           --health-retries 10
           --health-start-period 30s
-    strategy:
-      fail-fast: false
-      matrix:
-        index: [1, 2, 3, 4, 5]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -130,6 +132,10 @@ jobs:
     needs:
     - build-container
     - define-env
+    strategy:
+      fail-fast: false
+      matrix:
+        index: [1, 2, 3, 4, 5]
     services:
       flare_node:
         image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
@@ -148,10 +154,6 @@ jobs:
           --health-timeout 15s
           --health-retries 10
           --health-start-period 30s
-    strategy:
-      fail-fast: false
-      matrix:
-        index: [1, 2, 3, 4, 5]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
