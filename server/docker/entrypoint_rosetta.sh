@@ -19,6 +19,20 @@ if [ "$MODE" = "online" ]; then
     # Wait for go-flare port to bind
     curl ${ROSETTA_FLARE_ENDPOINT} --retry 6 --retry-connrefused --connect-timeout 5 --retry-delay 10 --silent --output /dev/null
 
+    if [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" == "true" ]; then
+        while true; do
+            result=$(curl -X POST --data '{"jsonrpc": "2.0","method": "info.isBootstrapped","params":{"chain":"C"},"id":1}' -H 'Content-Type: application/json' -H 'cache-control: no-cache' -s ${ROSETTA_FLARE_ENDPOINT}/ext/info)
+            is_bootstrapped=$(echo $result | jq '.result.isBootstrapped')
+            if [ "$is_bootstrapped" = "true" ]; then
+                echo "[rosetta-start-script] Network '$NETWORK_ID' is bootstrapped, OK!"
+                break
+            fi
+            echo "[rosetta-start-script] Network '$NETWORK_ID' NOT bootstrapped, retrying..."
+            sleep 1
+        done
+    fi
+
+
     while true
     do
         STATUS=$(curl -m 10 -s -w %{http_code} ${ROSETTA_FLARE_ENDPOINT}/ext/health -o /dev/null)
