@@ -16,13 +16,13 @@ jobs:
       contents: read
     outputs:
       IMAGE_TAG: ${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
-      IMAGE_PATH_0: ghcr.io/${{ github.repository }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}-${{ github.run_number }}
+      IMAGE_PATH_0: ghcr.io/${{ github.repository }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - id: ct_image_tag
-      run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      run: echo "IMAGE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
   build-container:
     runs-on: ubuntu-latest
