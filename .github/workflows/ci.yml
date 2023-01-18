@@ -16,7 +16,7 @@ jobs:
       contents: read
     outputs:
       IMAGE_TAG: ${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
-      IMAGE_PATH_0: ghcr.io/${{ github.repository }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
+      IMAGE_PATH_0: ghcr.io/${{ github.repository }}/${GITHUB_REPOSITORY#*/}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
     steps:
     - uses: actions/checkout@v3
       with:
