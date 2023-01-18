@@ -300,8 +300,8 @@ func TestPreprocessMetadata(t *testing.T) {
 	ctx := context.Background()
 	client := &mocks.Client{}
 	networkIdentifier := &types.NetworkIdentifier{
-		Network:    "Fuji",
-		Blockchain: "Flare",
+		Network:    "testnet",
+		Blockchain: "flare",
 	}
 	service := ConstructionService{
 		config: &Config{Mode: ModeOnline},

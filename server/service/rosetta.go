@@ -15,5 +15,5 @@ var NodeVersion = fmt.Sprintf(
 
 const (
 	MiddlewareVersion = "0.1.13"
-	BlockchainName    = "Flare"
+	BlockchainName    = "flare"
 )

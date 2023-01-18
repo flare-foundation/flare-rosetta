@@ -1,7 +1,7 @@
 {
     "mode": "online",
     "rpc_endpoint": "http://127.0.0.1:9650",
-    "network_name": "Flare",
+    "network_name": "mainnet",
     "genesis_block_hash": "0xf501834f1cfce08939acb0feadb11ca0a94d806c5bedb6700a771fc27d2f1068",
     "chain_id": 14
 }

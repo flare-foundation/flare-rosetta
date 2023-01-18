@@ -1,7 +1,7 @@
 {
   "network": {
-    "blockchain": "Flare",
-    "network": "Costwo"
+    "blockchain": "flare",
+    "network": "testnet"
   },
   "online_url": "http://localhost:8080",
   "http_timeout": 500,

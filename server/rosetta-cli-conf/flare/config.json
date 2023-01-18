@@ -1,7 +1,7 @@
 {
   "network": {
-    "blockchain": "Flare",
-    "network": "Flare"
+    "blockchain": "flare",
+    "network": "mainnet"
   },
   "online_url": "http://localhost:8080",
   "http_timeout": 500,
