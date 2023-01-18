@@ -26,7 +26,7 @@ request_funds(1){
 
 create_account(1){
   create{
-    network = {"network":"LocalFlare", "blockchain":"Flare"};
+    network = {"network":"localflare", "blockchain":"flare"};
     key = generate_key({"curve_type": "secp256k1"});
     account = derive({
       "network_identifier": {{network}},
@@ -43,7 +43,7 @@ create_account(1){
 
 transfer(10){
   transfer{
-    transfer.network = {"network":"LocalFlare", "blockchain":"Flare"};
+    transfer.network = {"network":"localflare", "blockchain":"flare"};
     currency = {"symbol":"FLR", "decimals":18};
     sender = find_balance({
       "minimum_balance":{

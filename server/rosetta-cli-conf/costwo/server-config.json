@@ -1,7 +1,7 @@
 {
     "mode": "online",
     "rpc_endpoint": "http://127.0.0.1:9650",
-    "network_name": "Costwo",
+    "network_name": "testnet",
     "genesis_block_hash": "0xc47d9c5d19d9cde5316780d1b0896ce2f20a0bc09c9ce2c86fbfafc0742b1e63",
     "chain_id": 114
 }
