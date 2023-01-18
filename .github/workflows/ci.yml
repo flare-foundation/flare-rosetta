@@ -16,7 +16,7 @@ jobs:
       contents: read
     outputs:
       IMAGE_TAG: ${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
-      IMAGE_PATH_0: ghcr.io/${{ github.repository }}/flare-rosetta:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}-${{ github.run_number }}
+      IMAGE_PATH_0: ghcr.io/${{ github.repository }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}-${{ github.run_number }}
     steps:
     - uses: actions/checkout@v3
       with:
