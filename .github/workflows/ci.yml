@@ -52,7 +52,7 @@ jobs:
     - name: get image sha256
       id: image_sha256
       run: |
-        echo "IMAGE_SHA256=$(docker inspect flarenetworklocal | jq --raw-output '.[0].Id')" >> $GITHUB_OUTPUT
+        echo "IMAGE_SHA256=$(docker inspect ${{ needs.define-env.outputs.IMAGE_PATH_0 }} | jq --raw-output '.[0].Id')" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
 
