@@ -33,6 +33,8 @@ jobs:
       packages: write
     needs:
     - define-env
+    outputs:
+      IMAGE_SHA256: ${{ steps.image_sha256.outputs.IMAGE_SHA256 }}
     steps:
     - uses: actions/checkout@v3
     - uses: docker/setup-qemu-action@v2
@@ -47,6 +49,11 @@ jobs:
       run: |
         docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }} -f ./server/Dockerfile .
         docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
+    - name: get image sha256
+      id: image_sha256
+      run: |
+        echo "IMAGE_SHA256=$(docker inspect flarenetworklocal | jq --raw-output '.[0].Id')" >> $GITHUB_OUTPUT
+        cat $GITHUB_OUTPUT
 
 
   test-container-localflare-online:
