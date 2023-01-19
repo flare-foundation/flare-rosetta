@@ -53,7 +53,7 @@ jobs:
       id: image_sha256
       run: |
         docker pull ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
-        export IMAGE_SHA256_0_FULL=$(docker image inspect --format='{{json .RepoDigests}}' registry.gitplac.si/aljaxus/fri-transfer/app:test | jq --raw-output '.[0]')
+        export IMAGE_SHA256_0_FULL=$(docker image inspect --format='{{json .RepoDigests}}' ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} | jq --raw-output '.[0]')
         echo "IMAGE_SHA256_0=${IMAGE_SHA256_0_FULL#*@}" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
