@@ -146,7 +146,7 @@ jobs:
         index: [1, 2, 3, 4, 5]
     services:
       flare_node:
-        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
+        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256 }}
         ports:
           - 9650:9650
           - 9651:9651
