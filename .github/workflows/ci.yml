@@ -47,12 +47,12 @@ jobs:
     - name: Build and push container image
       shell: bash
       run: |
-        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }} -f ./server/Dockerfile .
-        docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
+        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} -f ./server/Dockerfile .
+        docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
     - name: get image sha256
       id: image_sha256
       run: |
-        echo "IMAGE_SHA256=$(docker inspect ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ steps.ct_image_tag.outputs.IMAGE_TAG }} | jq --raw-output '.[0].Id')" >> $GITHUB_OUTPUT
+        echo "IMAGE_SHA256=$(docker inspect ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} | jq --raw-output '.[0].Id')" >> $GITHUB_OUTPUT
 
 
   test-container-localflare-online:
