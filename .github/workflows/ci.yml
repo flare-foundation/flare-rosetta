@@ -23,8 +23,9 @@ jobs:
         fetch-depth: 0
     - id: ct_image_tag
       run: |
-        if [[ "${GITHUB_REF#refs/*/}" == "main" ]]; then echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
-        else echo "IMAGE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        TAG_NORMALIZED=$(echo ${GITHUB_REF#refs/*/} | sed "s/[^[:alpha:]0-9.-]/-/g")
+        if [[ "$TAG_NORMALIZED" == "main" ]]; then echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+        else echo "IMAGE_TAG=$TAG_NORMALIZED" >> $GITHUB_OUTPUT
         fi
         echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
 
