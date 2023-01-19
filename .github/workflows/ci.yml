@@ -52,7 +52,8 @@ jobs:
     - name: get image sha256
       id: image_sha256
       run: |
-        echo "IMAGE_SHA256_0=$(docker manifest inspect ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} | jq --raw-output '.config.digest')" >> $GITHUB_OUTPUT
+        docker pull ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
+        echo "IMAGE_SHA256_0=$(docker images ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} --format '{{.Digest}}')" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
 
