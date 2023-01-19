@@ -55,7 +55,6 @@ jobs:
         docker pull ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
         export IMAGE_SHA256_0_FULL=$(docker image inspect --format='{{json .RepoDigests}}' ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} | jq --raw-output '.[0]')
         echo "IMAGE_SHA256_0=${IMAGE_SHA256_0_FULL#*@}" >> $GITHUB_OUTPUT
-        cat $GITHUB_OUTPUT
 
 
   test-container-localflare-online:
