@@ -49,12 +49,6 @@ jobs:
       run: |
         docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} -f ./server/Dockerfile .
         docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
-    - name: get image sha256
-      id: image_sha256
-      run: |
-        docker pull ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
-        echo "IMAGE_SHA256_0=$(docker images ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} --format '{{.Digest}}')" >> $GITHUB_OUTPUT
-        cat $GITHUB_OUTPUT
 
 
   test-container-localflare-online:
@@ -69,7 +63,7 @@ jobs:
         START_ROSETTA_SERVER_AFTER_BOOTSTRAP: [true, false]
     services:
       flare_node:
-        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
+        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_TAG }}
         ports:
           - 9650:9650
           - 9651:9651
@@ -148,7 +142,7 @@ jobs:
         index: [1, 2, 3, 4, 5]
     services:
       flare_node:
-        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
+        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_TAG }}
         ports:
           - 9650:9650
           - 9651:9651
