@@ -16,13 +16,18 @@ jobs:
       contents: read
     outputs:
       IMAGE_TAG: ${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
-      IMAGE_PATH_0: ghcr.io/${{ github.repository }}/flare-rosetta:${{ steps.ct_image_tag.outputs.IMAGE_TAG }}-${{ github.run_number }}
+      IMAGE_PATH_0: ghcr.io/${{ github.repository }}/${{ steps.ct_image_tag.outputs.REPOSITORY_NAME }}
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - id: ct_image_tag
-      run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      run: |
+        TAG_NORMALIZED=$(echo ${GITHUB_REF#refs/*/} | sed "s/[^[:alpha:]0-9.-]/-/g")
+        if [[ "$TAG_NORMALIZED" == "main" ]]; then echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+        else echo "IMAGE_TAG=$TAG_NORMALIZED" >> $GITHUB_OUTPUT
+        fi
+        echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
 
   build-container:
     runs-on: ubuntu-latest
@@ -31,6 +36,8 @@ jobs:
       packages: write
     needs:
     - define-env
+    outputs:
+      IMAGE_SHA256_0: ${{ steps.image_sha256.outputs.IMAGE_SHA256_0 }}
     steps:
     - uses: actions/checkout@v3
     - uses: docker/setup-qemu-action@v2
@@ -43,8 +50,14 @@ jobs:
     - name: Build and push container image
       shell: bash
       run: |
-        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }} -f ./server/Dockerfile .
-        docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
+        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} -f ./server/Dockerfile .
+        docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
+    - name: get image sha256
+      id: image_sha256
+      run: |
+        docker pull ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
+        export IMAGE_SHA256_0_FULL=$(docker image inspect --format='{{json .RepoDigests}}' ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} | jq --raw-output '.[0]')
+        echo "IMAGE_SHA256_0=${IMAGE_SHA256_0_FULL#*@}" >> $GITHUB_OUTPUT
 
 
   test-container-localflare-online:
@@ -59,7 +72,7 @@ jobs:
         START_ROSETTA_SERVER_AFTER_BOOTSTRAP: [true, false]
     services:
       flare_node:
-        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
+        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
         ports:
           - 9650:9650
           - 9651:9651
@@ -76,10 +89,8 @@ jobs:
           --health-retries 10
           --health-start-period 30s
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v3
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
       with:
         go-version: ${{ env.go_version }}
     - run: sudo apt update -y && sudo apt install curl -y
@@ -138,7 +149,7 @@ jobs:
         index: [1, 2, 3, 4, 5]
     services:
       flare_node:
-        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}
+        image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
         ports:
           - 9650:9650
           - 9651:9651
@@ -155,10 +166,8 @@ jobs:
           --health-retries 10
           --health-start-period 30s
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v3
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
       with:
         go-version: ${{ env.go_version }}
     - run: sudo apt update -y && sudo apt install curl -y
@@ -182,8 +191,8 @@ jobs:
   test-make_build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.go_version }}
       - run: (cd server && make build)
