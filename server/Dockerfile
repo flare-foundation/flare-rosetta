@@ -5,7 +5,7 @@ FROM golang:1.18.5 AS flare
 
 WORKDIR /app
 
-ARG GO_FLARE_VERSION=v0.7.1
+ARG GO_FLARE_VERSION=v1.7.1802
 ARG GO_FLARE_REPO=https://github.com/flare-foundation/go-flare
 
 RUN git clone --branch "$GO_FLARE_VERSION" "${GO_FLARE_REPO}" .
