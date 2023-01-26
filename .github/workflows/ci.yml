@@ -16,7 +16,7 @@ jobs:
       contents: read
     outputs:
       IMAGE_TAG: ${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
-      IMAGE_PATH_0: ghcr.io/${{ github.repository }}/${{ steps.ct_image_tag.outputs.REPOSITORY_NAME }}
+      IMAGE_PATH_0: ghcr.io/${{ github.repository }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -27,7 +27,6 @@ jobs:
         if [[ "$TAG_NORMALIZED" == "main" ]]; then echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
         else echo "IMAGE_TAG=$TAG_NORMALIZED" >> $GITHUB_OUTPUT
         fi
-        echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
 
   build-container:
     runs-on: ubuntu-latest
