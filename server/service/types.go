@@ -21,6 +21,10 @@ type options struct {
 	GasLimit               *big.Int        `json:"gas_limit,omitempty"`
 	Nonce                  *big.Int        `json:"nonce,omitempty"`
 	Currency               *types.Currency `json:"currency,omitempty"`
+	ContractAddress        string          `json:"contract_address,omitempty"`
+	MethodSignature        string          `json:"method_signature,omitempty"`
+	MethodArgs             interface{}     `json:"method_args,omitempty"`
+	Data                   []byte          `json:"data,omitempty"`
 }
 
 type optionsWire struct {
@@ -32,6 +36,10 @@ type optionsWire struct {
 	GasLimit               string          `json:"gas_limit,omitempty"`
 	Nonce                  string          `json:"nonce,omitempty"`
 	Currency               *types.Currency `json:"currency,omitempty"`
+	ContractAddress        string          `json:"contract_address,omitempty"`
+	MethodSignature        string          `json:"method_signature,omitempty"`
+	MethodArgs             interface{}     `json:"method_args,omitempty"`
+	Data                   string          `json:"data,omitempty"`
 }
 
 func (o *options) MarshalJSON() ([]byte, error) {
@@ -40,6 +48,9 @@ func (o *options) MarshalJSON() ([]byte, error) {
 		To:                     o.To,
 		SuggestedFeeMultiplier: o.SuggestedFeeMultiplier,
 		Currency:               o.Currency,
+		ContractAddress:        o.ContractAddress,
+		MethodSignature:        o.MethodSignature,
+		MethodArgs:             o.MethodArgs,
 	}
 	if o.Value != nil {
 		ow.Value = hexutil.EncodeBig(o.Value)
@@ -52,6 +63,9 @@ func (o *options) MarshalJSON() ([]byte, error) {
 	}
 	if o.Nonce != nil {
 		ow.Nonce = hexutil.EncodeBig(o.Nonce)
+	}
+	if len(o.Data) > 0 {
+		ow.Data = hexutil.Encode(o.Data)
 	}
 
 	return json.Marshal(ow)
@@ -66,6 +80,9 @@ func (o *options) UnmarshalJSON(data []byte) error {
 	o.To = ow.To
 	o.SuggestedFeeMultiplier = ow.SuggestedFeeMultiplier
 	o.Currency = ow.Currency
+	o.ContractAddress = ow.ContractAddress
+	o.MethodSignature = ow.MethodSignature
+	o.MethodArgs = ow.MethodArgs
 
 	if len(ow.Value) > 0 {
 		value, err := hexutil.DecodeBig(ow.Value)
@@ -99,28 +116,47 @@ func (o *options) UnmarshalJSON(data []byte) error {
 		o.Nonce = nonce
 	}
 
+	if len(ow.Data) > 0 {
+		data, err := hexutil.Decode(ow.Data)
+		if err != nil {
+			return err
+		}
+		o.Data = data
+	}
+
 	return nil
 }
 
 type metadata struct {
-	Nonce    uint64   `json:"nonce"`
-	GasPrice *big.Int `json:"gas_price"`
-	GasLimit uint64   `json:"gas_limit"`
+	Nonce           uint64      `json:"nonce"`
+	GasPrice        *big.Int    `json:"gas_price"`
+	GasLimit        uint64      `json:"gas_limit"`
+	MethodSignature string      `json:"method_signature,omitempty"`
+	MethodArgs      interface{} `json:"method_args,omitempty"`
+	Data            []byte      `json:"data,omitempty"`
 }
 
 type metadataWire struct {
-	Nonce    string `json:"nonce"`
-	GasPrice string `json:"gas_price"`
-	GasLimit string `json:"gas_limit"`
+	Nonce           string      `json:"nonce"`
+	GasPrice        string      `json:"gas_price"`
+	GasLimit        string      `json:"gas_limit"`
+	MethodSignature string      `json:"method_signature,omitempty"`
+	MethodArgs      interface{} `json:"method_args,omitempty"`
+	Data            string      `json:"data,omitempty"`
 }
 
 func (m *metadata) MarshalJSON() ([]byte, error) {
 	mw := &metadataWire{
-		Nonce:    hexutil.Uint64(m.Nonce).String(),
-		GasPrice: hexutil.EncodeBig(m.GasPrice),
-		GasLimit: hexutil.Uint64(m.GasLimit).String(),
+		Nonce:           hexutil.Uint64(m.Nonce).String(),
+		GasPrice:        hexutil.EncodeBig(m.GasPrice),
+		GasLimit:        hexutil.Uint64(m.GasLimit).String(),
+		MethodSignature: m.MethodSignature,
+		MethodArgs:      m.MethodArgs,
 	}
 
+	if len(m.Data) > 0 {
+		mw.Data = hexutil.Encode(m.Data)
+	}
 	return json.Marshal(mw)
 }
 
@@ -129,6 +165,9 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &mw); err != nil {
 		return err
 	}
+
+	m.MethodSignature = mw.MethodSignature
+	m.MethodArgs = mw.MethodArgs
 
 	gasPrice, err := hexutil.DecodeBig(mw.GasPrice)
 	if err != nil {
@@ -147,6 +186,14 @@ func (m *metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	m.Nonce = nonce
+
+	if len(mw.Data) > 0 {
+		mwData, err := hexutil.Decode(mw.Data)
+		if err != nil {
+			return err
+		}
+		m.Data = mwData
+	}
 
 	return nil
 }
