@@ -97,9 +97,11 @@ func (s ConstructionService) ConstructionMetadata(
 	var gasLimit uint64
 	if input.GasLimit == nil {
 		if input.Currency == nil || utils.Equal(input.Currency, mapper.FlareCurrency) {
-			gasLimit, err = s.getNativeTransferGasLimit(ctx, input.To, input.From, input.Value)
-		} else if len(input.ContractAddress) > 0 {
-			gasLimit, err = s.getGenericContractCallGasLimit(ctx, input.ContractAddress, input.From, input.Data)
+			if utils.Equal(input.Currency, mapper.FlareCurrency) && len(input.ContractAddress) > 0 {
+				gasLimit, err = s.getGenericContractCallGasLimit(ctx, input.ContractAddress, input.From, input.Data)
+			} else {
+				gasLimit, err = s.getNativeTransferGasLimit(ctx, input.To, input.From, input.Value)
+			}
 		} else {
 			gasLimit, err = s.getErc20TransferGasLimit(ctx, input.To, input.From, input.Value, input.Currency)
 		}
@@ -443,11 +445,13 @@ func (s ConstructionService) ConstructionPayloads(
 	var transferData []byte
 	var sendToAddress ethcommon.Address
 	if utils.Equal(fromCurrency, mapper.FlareCurrency) {
-		transferData = []byte{}
-		sendToAddress = ethcommon.HexToAddress(checkTo)
-	} else if len(metadata.MethodSignature) > 0 {
-		transferData = metadata.Data
-		sendToAddress = ethcommon.HexToAddress(checkTo)
+		if len(metadata.MethodSignature) == 0 {
+			transferData = []byte{}
+			sendToAddress = ethcommon.HexToAddress(checkTo)
+		} else {
+			transferData = metadata.Data
+			sendToAddress = ethcommon.HexToAddress(checkTo)
+		}
 	} else {
 		contract, ok := fromCurrency.Metadata[mapper.ContractAddressMetadata].(string)
 		if !ok {
