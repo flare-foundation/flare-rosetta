@@ -155,7 +155,10 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 				}
 				argData = value
 			}
+		default:
+			return nil, errors.New(fmt.Sprintf("invalid argument type:%s", v))
 		}
+
 		argumentsData = append(argumentsData, argData)
 	}
 

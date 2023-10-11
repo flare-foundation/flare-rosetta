@@ -525,6 +525,10 @@ func (s ConstructionService) ConstructionPreprocess(
 		return nil, wrapError(errInvalidInput, "unclear intent")
 	}
 
+	if len(matches) != 2 {
+		return nil, wrapError(errInvalidInput, "Must have only two operations")
+	}
+
 	fromOp, _ := matches[0].First()
 	fromAddress := fromOp.Account.Address
 	toOp, amount := matches[1].First()
