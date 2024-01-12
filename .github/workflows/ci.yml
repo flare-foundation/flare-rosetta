@@ -81,7 +81,7 @@ jobs:
           NETWORK_ID: localflare
           FLARE_LOCAL_TXS_ENABLED: true
           START_ROSETTA_SERVER_AFTER_BOOTSTRAP: ${{ matrix.START_ROSETTA_SERVER_AFTER_BOOTSTRAP }}
-          FLARE_EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
+          EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
         options: >-
           --health-interval 15s
           --health-timeout 15s
@@ -158,7 +158,7 @@ jobs:
           NETWORK_ID: localflare
           FLARE_LOCAL_TXS_ENABLED: true
           MODE: offline
-          FLARE_EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
+          EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
         options: >-
           --health-interval 15s
           --health-timeout 15s

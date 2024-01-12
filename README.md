@@ -111,7 +111,7 @@ check:data
 | `AUTOCONFIGURE_BOOTSTRAP_ENDPOINT_RETRY` | `0` | How many times, with delay of 10 seconds, should we retry contacting the bootstrap node. Handy when a node will bootstrap from another parallel-start node. |
 | `AUTOCONFIGURE_BOOTSTRAP_ENDPOINT` | _(empty)_ | Endpoint used for [bootstrapping](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#bootstrapping). Ex. `https://coston2.flare.network/ext/info`, `https://flare.flare.network/ext/info` |
 | `FLARE_LOCAL_TXS_ENABLED` | `false` | Set to `true` when running a one-node setup (ex. localflare). Docs about [local-txs-enabled-boolean](https://docs.avax.network/nodes/maintain/chain-config-flags#local-txs-enabled-boolean). |
-| `FLARE_EXTRA_ARGUMENTS` | | Extra arguments passed to flare binary |
+| `EXTRA_ARGUMENTS` | | Extra arguments passed to flare binary |
 | `ROSETTA_FLARE_ENDPOINT` | `http://127.0.0.1:9650` | go-flare HTTP endpoint used by rosetta |
 | `ROSETTA_CONFIG_PATH` | `/app/conf/${NETWORK_ID}/server-config.json` | Configuration path used by rosetta |
 | `STAKING_ENABLED` | `true` | set it to `false` to make avalanchego sample all nodes, not just validators. Read [Disabling staking](#disabling-staking)! Avalanchego docs: [--staking-enabled](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). |
