@@ -70,4 +70,4 @@ fi
 	--log-dir=$LOG_DIR \
 	--log-level=$LOG_LEVEL \
 	--network-id=$NETWORK_ID \
-	$FLARE_EXTRA_ARGUMENTS
+	$EXTRA_ARGUMENTS
