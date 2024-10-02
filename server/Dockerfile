@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Build go-flare
 # ------------------------------------------------------------------------------
-FROM golang:1.18.5 AS flare
+FROM golang:1.21 AS flare
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 # Build flare-rosetta
 # ------------------------------------------------------------------------------
-FROM golang:1.18.5 AS rosetta
+FROM golang:1.21 AS rosetta
 
 ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/main.zip
 ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-main
@@ -50,7 +50,7 @@ RUN \
 # ------------------------------------------------------------------------------
 # Target container for running the rosetta server
 # ------------------------------------------------------------------------------
-FROM ubuntu:20.04
+FROM ubuntu@sha256:340d9b015b194dc6e2a13938944e0d016e57b9679963fdeb9ce021daac430221
 
 ENV DEBIAN_FRONTEND=noninteractive
 

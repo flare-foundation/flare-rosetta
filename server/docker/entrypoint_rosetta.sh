@@ -17,7 +17,8 @@ fi
 if [ "$MODE" = "online" ]; then
 
     # Wait for go-flare port to bind
-    curl ${ROSETTA_FLARE_ENDPOINT} --retry 6 --retry-connrefused --connect-timeout 5 --retry-delay 10 --silent --output /dev/null
+    sleep 30
+    curl ${ROSETTA_FLARE_ENDPOINT} --retry 6 --retry-connrefused --retry-all-errors --connect-timeout 5 --retry-delay 10 --silent --output /dev/null
 
     if [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" == "true" ]; then
         while true; do
