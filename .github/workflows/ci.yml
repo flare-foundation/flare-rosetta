@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  go_version: 1.18.5
+  go_version: 1.21.13
 
 jobs:
 
