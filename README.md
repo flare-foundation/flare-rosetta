@@ -1,12 +1,12 @@
 # go-flare-rosetta
 
 ## System Requirements
-- go version 1.18.5
+- go version 1.21
 - gcc, g++ and jq
 - CPU: Equivalent of 8 AWS vCPU
 - RAM: 16 GiB
 - Storage: 1TB
-- OS: Ubuntu 18.04/20.04 or macOS >= 10.15 (Catalina)
+- OS: Ubuntu 22.04 or macOS >= 10.15 (Catalina)
 
 # Launch a Costwo testnet or Flare mainnet Node
 
