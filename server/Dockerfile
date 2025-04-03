@@ -48,9 +48,9 @@ RUN \
   make build
 
 # ------------------------------------------------------------------------------
-# Target container for running the rosetta server
+# Target container for running the rosetta server - Ubuntu 22.04
 # ------------------------------------------------------------------------------
-FROM ubuntu@sha256:340d9b015b194dc6e2a13938944e0d016e57b9679963fdeb9ce021daac430221
+FROM ubuntu@sha256:ed1544e454989078f5dec1bfdabd8c5cc9c48e0705d07b678ab6ae3fb61952d2
 
 ENV DEBIAN_FRONTEND=noninteractive
 
