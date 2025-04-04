@@ -70,4 +70,5 @@ fi
 	--log-dir=$LOG_DIR \
 	--log-level=$LOG_LEVEL \
 	--network-id=$NETWORK_ID \
+	--api-keystore-enabled=true \
 	$EXTRA_ARGUMENTS
