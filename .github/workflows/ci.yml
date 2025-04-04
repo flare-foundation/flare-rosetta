@@ -125,7 +125,7 @@ jobs:
       shell: bash
       run: |
         mkdir -p /tmp/rosetta
-        curl -o /tmp/rosetta/install.sh -sSfL https://raw.githubusercontent.com/coinbase/rosetta-cli/d5ccb7c5cdfc60cd23ff7cb010dea1bf19f80547/scripts/install.sh
+        curl -o /tmp/rosetta/install.sh -sSfL https://raw.githubusercontent.com/coinbase/mesh-cli/refs/tags/v0.10.4/scripts/install.sh
         bash /tmp/rosetta/install.sh -b /tmp/rosetta/
     - name: Run rosetta-cli check:construction
       timeout-minutes: 5
