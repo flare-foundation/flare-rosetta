@@ -88,5 +88,176 @@
             "symbol": "FLR",
             "decimals": 18
         }
+    },
+    {
+        "account_identifier": {
+            "address": "0xbd33bDFf04C357F7FC019E72D0504C24CF4Aa010"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x33913AcE907F682E305f36d7538D3cCd37E2cA5B"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x81155a4D550515BD11412020eDa5c86aE61eA907"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xBE98167BAF8e56Ad8Ac2cf45e49f10369315E186"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x50710aeecf19C52E7d7E15f36e9a9BB12B23e0B1"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x8Bb1b51e2E95cC23595823Fcd4CDAfc9bB74B697"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xADB9c3A2d50a21ceAAd2ADf7Cd250130aef69FAb"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x39504d19e95bEd34C36ba3811B2a3C656ABd7Ccd"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x2B180Db6d4f0a7531CF3Ec41CbdF117E7B86325C"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x4502C8eA50Ebf413d13A3949107d2F735bBD2368"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xf73B824BDF8cC3d4db3483748a7963297d65895A"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xe69673A2dD9Ab7436b9649Db3be6D4014bb0c0e9"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x2F10597B3c9Fd42031cb18818eF2Ab88b18Ceff8"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xB66F00A68DAC3b2e97f616124326956ab234B486"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x530fbcbbb5BBC147a0Dd860AEd613691305282eb"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x1D909B76E8Ec3723610C95617a83Ffe286B3a748"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xF5e81bcFDD443CdF1EdAE9f477AB10509bb5746f"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xf33772066FE395Ba724E2200e324c0C19B625816"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0x6B72B7E008483393430B60aDfc138d8b8065d60b"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
     }
 ]
