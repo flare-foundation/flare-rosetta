@@ -62,4 +62,4 @@ fi
 	--network-id="$NETWORK_ID" \
 	--api-keystore-enabled=true \
 	--http-allowed-hosts="$HTTP_ALLOWED_HOSTS" \
-	"$EXTRA_ARGUMENTS"
+	$EXTRA_ARGUMENTS
