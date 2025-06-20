@@ -1,7 +1,7 @@
 # go-flare-rosetta
 
 ## System Requirements
-- go version 1.21
+- go version 1.22
 - gcc, g++ and jq
 - CPU: Equivalent of 8 AWS vCPU
 - RAM: 16 GiB
@@ -64,7 +64,12 @@ The following scripts use local RPC endpoints for the Flare and Costwo networks,
 
 # Testing
 
-Install the rosetta-cli: https://github.com/coinbase/rosetta-cli#installation
+Install the rosetta-cli: 
+```
+mkdir /tmp/rosetta && curl -o /tmp/rosetta/install.sh -sSfL https://raw.githubusercontent.com/coinbase/mesh-cli/refs/tags/v0.10.4/scripts/install.sh
+sed -i 's/REPO="rosetta-cli"/REPO="mesh-cli"/g' /tmp/rosetta/install.sh
+bash /tmp/rosetta/install.sh -b /usr/local/bin v0.10.4
+```
 
 Test requirements: a fully-synced Costwo or Flare node using the above config, and a connected Flare Rosetta server.
 
@@ -114,7 +119,6 @@ check:data
 | `EXTRA_ARGUMENTS` | | Extra arguments passed to flare binary |
 | `ROSETTA_FLARE_ENDPOINT` | `http://127.0.0.1:9650` | go-flare HTTP endpoint used by rosetta |
 | `ROSETTA_CONFIG_PATH` | `/app/conf/${NETWORK_ID}/server-config.json` | Configuration path used by rosetta |
-| `STAKING_ENABLED` | `true` | set it to `false` to make avalanchego sample all nodes, not just validators. Read [Disabling staking](#disabling-staking)! Avalanchego docs: [--staking-enabled](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). |
 | `MODE` | `online` | Run rosetta in [`online`](https://www.rosetta-api.org/docs/node_deployment.html#online-mode-endpoints) or [`offline`](https://www.rosetta-api.org/docs/node_deployment.html#offline-mode-endpoints) mode |
 | `START_ROSETTA_SERVER_AFTER_BOOTSTRAP` | `false` | Waits for go-flare to fully bootstrap before launching rosetta-server |
 
@@ -136,10 +140,6 @@ check:data
 
 
 Config folders in [`rosetta-cli-conf`](./server/rosetta-cli-conf/) also contain the Rosetta server config `server-config.json`. The used location of this config file can be overwritted with `ROSETTA_CONFIG_PATH` environment variable.
-
-### Disabling staking
-
-Disabling Proof of Stake is **dangerous**! Read the [avalanchego documentation](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--staking-enabled-boolean). If you want to proceed with disabled staking you will also need to [confirm this setting](#confirming-dangerous-settings) as it is a dangerous one.
 
 ### Confirming dangerous settings
 

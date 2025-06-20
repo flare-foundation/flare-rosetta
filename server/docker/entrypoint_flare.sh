@@ -18,18 +18,9 @@ if [ "$NETWORK_ID" != "flare" ] && [ "$NETWORK_ID" != "costwo" ] && [ "$NETWORK_
 fi
 
 if [ "$NETWORK_ID" = "flare" ]; then
-	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://flare.flare.network/ext/info'}
+	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://flare-bootstrap.flare.network/ext/info'}
 elif [ "$NETWORK_ID" = "costwo" ]; then
-	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://coston2.flare.network/ext/info'}
-fi
-
-if [ "$STAKING_ENABLED" = "false" ] && [ "$YES_I_REALLY_KNOW_WHAT_I_AM_DOING" != "i-have-read-the-documentation" ]; then
-	echo "<ERROR>"
-	echo "  STAKING_ENABLED env var is set to 'false'"
-	echo "  but you have not confirmed that you ACTUALLY know what you are doing,"
-	echo "  that you have read the documentation and are aware of the dangers of this mode"
-	echo "</ERROR>"
-	exit 1
+	export AUTOCONFIGURE_BOOTSTRAP_ENDPOINT=${AUTOCONFIGURE_BOOTSTRAP_ENDPOINT:-'https://coston2-bootstrap.flare.network/ext/info'}
 fi
 
 if [ "$FLARE_LOCAL_TXS_ENABLED" = "true" ]; then
@@ -57,18 +48,18 @@ then
 fi
 
 /app/flare/build/avalanchego \
-	--http-host=$HTTP_HOST \
-	--http-port=$HTTP_PORT \
-	--staking-port=$STAKING_PORT \
-	--staking-enabled=$STAKING_ENABLED \
-	--public-ip=$PUBLIC_IP \
-	--db-dir=$DB_DIR \
-	--db-type=$DB_TYPE \
-	--bootstrap-ips=$BOOTSTRAP_IPS \
-	--bootstrap-ids=$BOOTSTRAP_IDS \
-	--chain-config-dir=$CHAIN_CONFIG_DIR \
-	--log-dir=$LOG_DIR \
-	--log-level=$LOG_LEVEL \
-	--network-id=$NETWORK_ID \
+	--http-host="$HTTP_HOST" \
+	--http-port="$HTTP_PORT" \
+	--staking-port="$STAKING_PORT" \
+	--public-ip="$PUBLIC_IP" \
+	--db-dir="$DB_DIR" \
+	--db-type="$DB_TYPE" \
+	--bootstrap-ips="$BOOTSTRAP_IPS" \
+	--bootstrap-ids="$BOOTSTRAP_IDS" \
+	--chain-config-dir="$CHAIN_CONFIG_DIR" \
+	--log-dir="$LOG_DIR" \
+	--log-level="$LOG_LEVEL" \
+	--network-id="$NETWORK_ID" \
 	--api-keystore-enabled=true \
-	$EXTRA_ARGUMENTS
+	-http-allowed-hosts="$HTTP_ALLOWED_HOSTS" \
+	"$EXTRA_ARGUMENTS"
