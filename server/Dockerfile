@@ -20,7 +20,7 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 FROM golang:1.22 AS rosetta
 
-ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/feature/main.zip
+ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/main.zip
 ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-main
 
 WORKDIR /tmp
