@@ -1,11 +1,11 @@
 # ------------------------------------------------------------------------------
 # Build go-flare
 # ------------------------------------------------------------------------------
-FROM golang:1.21 AS flare
+FROM golang:1.22 AS flare
 
 WORKDIR /app
 
-ARG GO_FLARE_VERSION=v1.10.0
+ARG GO_FLARE_VERSION=v1.11.0
 ARG GO_FLARE_REPO=https://github.com/flare-foundation/go-flare
 
 RUN git clone --branch "$GO_FLARE_VERSION" "${GO_FLARE_REPO}" .
@@ -18,9 +18,9 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 # Build flare-rosetta
 # ------------------------------------------------------------------------------
-FROM golang:1.21 AS rosetta
+FROM golang:1.22 AS rosetta
 
-ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/main.zip
+ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/feature/main.zip
 ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-main
 
 WORKDIR /tmp
@@ -71,9 +71,8 @@ ENV HTTP_HOST=0.0.0.0 \
     START_ROSETTA_SERVER_AFTER_BOOTSTRAP=false \
     AUTOCONFIGURE_BOOTSTRAP_ENDPOINT="" \
     AUTOCONFIGURE_BOOTSTRAP_ENDPOINT_RETRY=0 \
-    STAKING_ENABLED="true" \
-    YES_I_REALLY_KNOW_WHAT_I_AM_DOING="false"
-
+    YES_I_REALLY_KNOW_WHAT_I_AM_DOING="false" \
+    HTTP_ALLOWED_HOSTS="*"
 
 
 # Intentionally empty, so env vars are evalueted at runtime (script entrypoint_flare.sh) instead of build time
