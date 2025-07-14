@@ -2,6 +2,9 @@ package client
 
 import (
 	"context"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/network/peer"
+	"github.com/ava-labs/avalanchego/utils/json"
 	"math/big"
 	"strings"
 
@@ -34,12 +37,50 @@ type Client interface {
 	TxPoolContent(context.Context) (*TxPoolContent, error)
 	GetNetworkName(context.Context, ...rpc.Option) (string, error)
 	Peers(context.Context, ...rpc.Option) ([]info.Peer, error)
+	// Peers_v1_11 enables info.peers RPC call compatible with v1.11.
+	// Once the dependencies are upgraded, this should be replaced with Peers.
+	Peers_v1_11(context.Context, []ids.NodeID, ...rpc.Option) ([]Peer_v1_11, error)
 	GetContractInfo(ethcommon.Address, bool) (string, uint8, error)
 	CallContract(context.Context, interfaces.CallMsg, *big.Int) ([]byte, error)
 }
 
+type clientFix struct {
+	requester rpc.EndpointRequester
+}
+
+func newClientFix(uri string) *clientFix {
+	return &clientFix{
+		requester: rpc.NewEndpointRequester(
+			uri+"/ext/info",
+			"info",
+		),
+	}
+}
+
+type Peer_v1_11 struct {
+	peer.Info
+
+	Benched []string `json:"benched"`
+}
+
+type PeersReply_v1_11 struct {
+	// Number of elements in [Peers]
+	NumPeers json.Uint64 `json:"numPeers"`
+	// Each element is a peer
+	Peers []Peer_v1_11 `json:"peers"`
+}
+
+func (cf *clientFix) Peers_v1_11(ctx context.Context, nodeIDs []ids.NodeID, options ...rpc.Option) ([]Peer_v1_11, error) {
+	res := &PeersReply_v1_11{}
+	err := cf.requester.SendRequest(ctx, "peers", &info.PeersArgs{
+		NodeIDs: nodeIDs,
+	}, res, options...)
+	return res.Peers, err
+}
+
 type client struct {
 	info.Client
+	*clientFix
 	*EthClient
 	*ContractClient
 }
@@ -55,6 +96,7 @@ func NewClient(ctx context.Context, endpoint string) (Client, error) {
 
 	return client{
 		Client:         info.NewClient(endpoint),
+		clientFix:      newClientFix(endpoint),
 		EthClient:      eth,
 		ContractClient: NewContractClient(eth.Client),
 	}, nil

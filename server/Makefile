@@ -120,5 +120,6 @@ check-mainnet-construction:
 	rosetta-cli check:construction --configuration-file=rosetta-cli-conf/mainnet/config.json
 
 mocks:
+	# go install github.com/vektra/mockery/v2@v2.53
 	rm -rf mocks;
 	mockery --dir client --all --case underscore --outpkg client --output mocks/client;
