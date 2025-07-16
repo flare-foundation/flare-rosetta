@@ -1,9 +1,8 @@
 package mapper
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
@@ -41,6 +40,12 @@ const (
 
 	StatusSuccess = "SUCCESS"
 	StatusFailure = "FAILURE"
+
+	MetadataTxFee           = "tx_fee"
+	MetadataImportedInputs  = "imported_inputs"
+	MetadataExportedOutputs = "exported_outputs"
+	MetadataAddressFormat   = "address_format"
+	AddressFormatBech32     = "bech32"
 )
 
 var (
@@ -57,6 +62,11 @@ var (
 	FlareCurrency = &types.Currency{
 		Symbol:   "FLR",
 		Decimals: 18,
+	}
+
+	AtomicAvaxCurrency = &types.Currency{
+		Symbol:   "AVAX",
+		Decimals: 9,
 	}
 
 	OperationStatuses = []*types.OperationStatus{

@@ -12,7 +12,16 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"golang.org/x/crypto/sha3"
+	"github.com/ethereum/go-ethereum/crypto"
+)
+
+// The following implementations are derived from rosetta-geth-sdk:
+//
+// https://github.com/coinbase/rosetta-geth-sdk/blob/master/services/construction/contract_call_data.go
+
+const (
+	split  = 2
+	base10 = 10
 )
 
 // constructContractCallDataGeneric constructs the data field of a transaction.
@@ -70,13 +79,9 @@ func constructContractCallDataGeneric(methodSig string, methodArgs interface{}) 
 // It attempts to first convert the string arg to it's corresponding type in the method signature,
 // and then performs abi encoding to the converted args list and construct the data.
 func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []string) ([]byte, error) {
-	arguments := abi.Arguments{}
-	var argumentsData []interface{}
-
 	var data []byte
 	data = append(data, methodID...)
 
-	const split = 2
 	splitSigByLeadingParenthesis := strings.Split(methodSig, "(")
 	if len(splitSigByLeadingParenthesis) < split {
 		return data, nil
@@ -86,11 +91,12 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 		return data, nil
 	}
 	splitSigByComma := strings.Split(splitSigByTrailingParenthesis[0], ",")
-
 	if len(splitSigByComma) != len(methodArgs) {
 		return nil, errors.New("invalid method arguments")
 	}
 
+	arguments := abi.Arguments{}
+	argumentsData := make([]interface{}, 0, len(splitSigByComma))
 	for i, v := range splitSigByComma {
 		typed, _ := abi.NewType(v, v, nil)
 		argument := abi.Arguments{
@@ -101,7 +107,6 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 
 		arguments = append(arguments, argument...)
 		var argData interface{}
-		const base = 10
 		switch {
 		case v == "address":
 			{
@@ -109,7 +114,7 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 			}
 		case v == "uint32":
 			{
-				u64, err := strconv.ParseUint(methodArgs[i], 10, 32)
+				u64, err := strconv.ParseUint(methodArgs[i], base10, 32)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -118,7 +123,7 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 		case strings.HasPrefix(v, "uint") || strings.HasPrefix(v, "int"):
 			{
 				value := new(big.Int)
-				value.SetString(methodArgs[i], base)
+				value.SetString(methodArgs[i], base10)
 				argData = value
 			}
 		case v == "bytes32":
@@ -133,15 +138,11 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 			}
 		case strings.HasPrefix(v, "bytes"):
 			{
-				// No fixed size set as it would make it an "array" instead
-				// of a "slice" when encoding. We want it to be a slice.
-				value := []byte{}
 				bytes, err := hexutil.Decode(methodArgs[i])
 				if err != nil {
 					log.Fatal(err)
 				}
-				copy(value[:], bytes) // nolint:gocritic
-				argData = value
+				argData = bytes
 			}
 		case strings.HasPrefix(v, "string"):
 			{
@@ -156,9 +157,8 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 				argData = value
 			}
 		default:
-			return nil, errors.New(fmt.Sprintf("invalid argument type:%s", v))
+			return nil, fmt.Errorf("invalid argument type: %s", v)
 		}
-
 		argumentsData = append(argumentsData, argData)
 	}
 
@@ -174,11 +174,8 @@ func encodeMethodArgsStrings(methodID []byte, methodSig string, methodArgs []str
 // contractCallMethodID calculates the first 4 bytes of the method
 // signature for function call on contract
 func contractCallMethodID(methodSig string) ([]byte, error) {
-	fnSignature := []byte(methodSig)
-	hash := sha3.NewLegacyKeccak256()
-	if _, err := hash.Write(fnSignature); err != nil {
-		return nil, err
+	if len(methodSig) < 4 {
+		return nil, errors.New("method signature is empty or too small")
 	}
-
-	return hash.Sum(nil)[:4], nil
+	return crypto.Keccak256([]byte(methodSig))[:4], nil
 }

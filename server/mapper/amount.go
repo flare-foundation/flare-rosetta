@@ -22,6 +22,11 @@ func FlareAmount(value *big.Int) *types.Amount {
 	return Amount(value, FlareCurrency)
 }
 
+// AtomicAvaxAmount creates a Rosetta Amount representing AVAX amount in nAVAXs with given quantity
+func AtomicAvaxAmount(value *big.Int) *types.Amount {
+	return Amount(value, AtomicAvaxCurrency)
+}
+
 func Erc20Amount(
 	bytes []byte,
 	currency *types.Currency,

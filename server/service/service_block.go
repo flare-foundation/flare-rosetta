@@ -5,31 +5,55 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/coreth/core"
 	"github.com/coinbase/rosetta-sdk-go/server"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/coinbase/rosetta-sdk-go/utils"
-
-	corethTypes "github.com/ava-labs/coreth/core/types"
-	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/ava-labs/avalanche-rosetta/client"
+	"github.com/ava-labs/avalanche-rosetta/constants"
 	"github.com/ava-labs/avalanche-rosetta/mapper"
+
+	ethtypes "github.com/ava-labs/coreth/core/types"
 )
+
+// BlockBackend represents a backend that implements /block family of apis for a subset of requests
+// Endpoint handlers in this file delegates requests to corresponding backends based on the request.
+// Each backend implements a ShouldHandleRequest method to determine whether that backend should handle the given request.
+//
+// P-chain support is implemented in pchain.Backend which implements this interface.
+// Eventually, the C-chain block logic implemented in this file should be extracted to its own backend as well.
+type BlockBackend interface {
+	// ShouldHandleRequest returns whether a given request should be handled by this backend
+	ShouldHandleRequest(req interface{}) bool
+	// Block implements /block endpoint for this backend
+	Block(ctx context.Context, request *types.BlockRequest) (*types.BlockResponse, *types.Error)
+	// BlockTransaction implements /block/transaction endpoint for this backend
+	BlockTransaction(ctx context.Context, request *types.BlockTransactionRequest) (*types.BlockTransactionResponse, *types.Error)
+}
 
 // BlockService implements the /block/* endpoints
 type BlockService struct {
-	config *Config
-	client client.Client
+	config        *Config
+	client        client.Client
+	pChainBackend BlockBackend
 
 	genesisBlock *types.Block
 }
 
 // NewBlockService returns a new block servicer
-func NewBlockService(config *Config, c client.Client) server.BlockAPIServicer {
+func NewBlockService(
+	config *Config,
+	c client.Client,
+	pChainBackend BlockBackend,
+) server.BlockAPIServicer {
 	return &BlockService{
-		config:       config,
-		client:       c,
-		genesisBlock: makeGenesisBlock(config.GenesisBlockHash),
+		config:        config,
+		client:        c,
+		pChainBackend: pChainBackend,
+		genesisBlock:  makeGenesisBlock(config.GenesisBlockHash),
 	}
 }
 
@@ -39,14 +63,18 @@ func (s *BlockService) Block(
 	request *types.BlockRequest,
 ) (*types.BlockResponse, *types.Error) {
 	if s.config.IsOfflineMode() {
-		return nil, errUnavailableOffline
+		return nil, ErrUnavailableOffline
 	}
 
 	if request.BlockIdentifier == nil {
-		return nil, errBlockInvalidInput
+		return nil, ErrBlockInvalidInput
 	}
 	if request.BlockIdentifier.Hash == nil && request.BlockIdentifier.Index == nil {
-		return nil, errBlockInvalidInput
+		return nil, ErrBlockInvalidInput
+	}
+
+	if s.pChainBackend.ShouldHandleRequest(request) {
+		return s.pChainBackend.Block(ctx, request)
 	}
 
 	if s.isGenesisBlockRequest(request.BlockIdentifier) {
@@ -58,20 +86,20 @@ func (s *BlockService) Block(
 	var (
 		blockIdentifier       *types.BlockIdentifier
 		parentBlockIdentifier *types.BlockIdentifier
-		block                 *corethTypes.Block
+		block                 *ethtypes.Block
 		err                   error
 	)
 
 	if hash := request.BlockIdentifier.Hash; hash != nil {
-		block, err = s.client.BlockByHash(ctx, ethcommon.HexToHash(*hash))
+		block, err = s.client.BlockByHash(ctx, common.HexToHash(*hash))
 	} else if index := request.BlockIdentifier.Index; block == nil && index != nil {
 		block, err = s.client.BlockByNumber(ctx, big.NewInt(*index))
 	}
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			return nil, errBlockNotFound
+			return nil, ErrBlockNotFound
 		}
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
 	blockIdentifier = &types.BlockIdentifier{
@@ -82,7 +110,7 @@ func (s *BlockService) Block(
 	if block.ParentHash().String() != s.config.GenesisBlockHash {
 		parentBlock, err := s.client.HeaderByHash(ctx, block.ParentHash())
 		if err != nil {
-			return nil, wrapError(errClientError, err)
+			return nil, WrapError(ErrClientError, err)
 		}
 
 		parentBlockIdentifier = &types.BlockIdentifier{
@@ -98,7 +126,7 @@ func (s *BlockService) Block(
 		return nil, terr
 	}
 
-	crosstx, terr := s.parseCrossChainTransactions(block)
+	crosstx, terr := s.parseCrossChainTransactions(request.NetworkIdentifier, block)
 	if terr != nil {
 		return nil, terr
 	}
@@ -120,22 +148,26 @@ func (s *BlockService) BlockTransaction(
 	request *types.BlockTransactionRequest,
 ) (*types.BlockTransactionResponse, *types.Error) {
 	if s.config.IsOfflineMode() {
-		return nil, errUnavailableOffline
+		return nil, ErrUnavailableOffline
 	}
 
 	if request.BlockIdentifier == nil {
-		return nil, wrapError(errInvalidInput, "block identifier is not provided")
+		return nil, WrapError(ErrInvalidInput, "block identifier is not provided")
 	}
 
-	header, err := s.client.HeaderByHash(ctx, ethcommon.HexToHash(request.BlockIdentifier.Hash))
+	if s.pChainBackend.ShouldHandleRequest(request) {
+		return s.pChainBackend.BlockTransaction(ctx, request)
+	}
+
+	header, err := s.client.HeaderByHash(ctx, common.HexToHash(request.BlockIdentifier.Hash))
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
-	hash := ethcommon.HexToHash(request.TransactionIdentifier.Hash)
+	hash := common.HexToHash(request.TransactionIdentifier.Hash)
 	tx, pending, err := s.client.TransactionByHash(ctx, hash)
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 	if pending {
 		return nil, nil
@@ -143,7 +175,7 @@ func (s *BlockService) BlockTransaction(
 
 	trace, flattened, err := s.client.TraceTransaction(ctx, tx.Hash().String())
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
 	transaction, terr := s.fetchTransaction(ctx, tx, header, trace, flattened)
@@ -158,13 +190,13 @@ func (s *BlockService) BlockTransaction(
 
 func (s *BlockService) fetchTransactions(
 	ctx context.Context,
-	block *corethTypes.Block,
+	block *ethtypes.Block,
 ) ([]*types.Transaction, *types.Error) {
 	transactions := []*types.Transaction{}
 
 	trace, flattened, err := s.client.TraceBlockByHash(ctx, block.Hash().String())
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
 	for i, tx := range block.Transactions() {
@@ -181,37 +213,42 @@ func (s *BlockService) fetchTransactions(
 
 func (s *BlockService) fetchTransaction(
 	ctx context.Context,
-	tx *corethTypes.Transaction,
-	header *corethTypes.Header,
+	tx *ethtypes.Transaction,
+	header *ethtypes.Header,
 	trace *client.Call,
 	flattened []*client.FlatCall,
 ) (*types.Transaction, *types.Error) {
-	msg, err := tx.AsMessage(s.config.Signer(), header.BaseFee)
+	msg, err := core.TransactionToMessage(tx, s.config.Signer(), header.BaseFee)
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
 	receipt, err := s.client.TransactionReceipt(ctx, tx.Hash())
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
-	transaction, err := mapper.Transaction(header, tx, &msg, receipt, trace, flattened, s.client, s.config.IsAnalyticsMode(), s.config.TokenWhiteList, s.config.IndexUnknownTokens)
+	transaction, err := mapper.Transaction(header, tx, msg, receipt, trace, flattened, s.client, s.config.IsAnalyticsMode(), s.config.TokenWhiteList, s.config.IndexUnknownTokens)
 	if err != nil {
-		return nil, wrapError(errInternalError, err)
+		return nil, WrapError(ErrInternalError, err)
 	}
 
 	return transaction, nil
 }
 
 func (s *BlockService) parseCrossChainTransactions(
-	block *corethTypes.Block,
+	networkIdentifier *types.NetworkIdentifier,
+	block *ethtypes.Block,
 ) ([]*types.Transaction, *types.Error) {
 	result := []*types.Transaction{}
 
-	crossTxs, err := mapper.CrossChainTransactions(s.config.FlareAssetID, block, s.config.AP5Activation)
+	// This map is used to create addresses for cross chain export outputs
+	chainIDToAliasMapping := map[ids.ID]constants.ChainIDAlias{
+		ids.Empty: constants.PChain,
+	}
+	crossTxs, err := mapper.CrossChainTransactions(networkIdentifier, chainIDToAliasMapping, s.config.FlareAssetID, block, s.config.AP5Activation)
 	if err != nil {
-		return nil, wrapError(errInternalError, err)
+		return nil, WrapError(ErrInternalError, err)
 	}
 
 	for _, tx := range crossTxs {
