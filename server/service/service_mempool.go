@@ -27,15 +27,15 @@ func NewMempoolService(config *Config, client client.Client) server.MempoolAPISe
 // Mempool implements the /mempool endpoint
 func (s MempoolService) Mempool(
 	ctx context.Context,
-	req *types.NetworkRequest,
+	_ *types.NetworkRequest,
 ) (*types.MempoolResponse, *types.Error) {
 	if s.config.IsOfflineMode() {
-		return nil, errUnavailableOffline
+		return nil, ErrUnavailableOffline
 	}
 
 	content, err := s.client.TxPoolContent(ctx)
 	if err != nil {
-		return nil, wrapError(errClientError, err)
+		return nil, WrapError(ErrClientError, err)
 	}
 
 	return &types.MempoolResponse{
@@ -47,9 +47,9 @@ func (s MempoolService) Mempool(
 }
 
 // MempoolTransaction implements the /mempool/transaction endpoint
-func (s MempoolService) MempoolTransaction(
-	ctx context.Context,
-	req *types.MempoolTransactionRequest,
+func (MempoolService) MempoolTransaction(
+	_ context.Context,
+	_ *types.MempoolTransactionRequest,
 ) (*types.MempoolTransactionResponse, *types.Error) {
-	return nil, errNotImplemented
+	return nil, ErrNotImplemented
 }
