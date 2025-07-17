@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/ava-labs/avalanchego/ids"
 	"math/big"
 
 	"github.com/coinbase/rosetta-sdk-go/server"
@@ -52,11 +53,11 @@ func (s *NetworkService) NetworkStatus(
 	}
 
 	// Fetch peers
-	infoPeers, err := s.client.Peers(ctx)
+	infoPeers, err := s.client.Peers_v1_11(ctx, []ids.NodeID{})
 	if err != nil {
 		return nil, wrapError(errClientError, err)
 	}
-	peers := mapper.Peers(infoPeers)
+	peers := mapper.Peers_v1_11(infoPeers)
 
 	// Check if all C/X chains are ready
 	if err := checkBootstrapStatus(ctx, s.client); err != nil {
