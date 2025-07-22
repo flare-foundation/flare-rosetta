@@ -17,7 +17,7 @@ import (
 func TestShouldHandleRequest(t *testing.T) {
 	cChainNetworkIdentifier := &types.NetworkIdentifier{
 		Blockchain: service.BlockchainName,
-		Network:    constants.FujiNetwork,
+		Network:    constants.TestnetNetwork,
 	}
 
 	bech32AccountIdentifier := &types.AccountIdentifier{Address: "C-avax1us3us4s4mv0g85vxjm8va04ewdl27wcwnqwejf"}

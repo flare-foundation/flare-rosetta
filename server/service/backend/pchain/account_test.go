@@ -95,7 +95,7 @@ func TestAccountBalance(t *testing.T) {
 			ctx,
 			&types.AccountBalanceRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
@@ -142,7 +142,7 @@ func TestAccountBalance(t *testing.T) {
 			ctx,
 			&types.AccountBalanceRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
@@ -186,7 +186,7 @@ func TestAccountBalance(t *testing.T) {
 			ctx,
 			&types.AccountBalanceRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
@@ -272,7 +272,7 @@ func TestAccountPendingRewardsBalance(t *testing.T) {
 			ctx,
 			&types.AccountBalanceRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
@@ -316,7 +316,7 @@ func TestAccountPendingRewardsBalance(t *testing.T) {
 			ctx,
 			&types.AccountBalanceRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
@@ -398,7 +398,7 @@ func TestAccountCoins(t *testing.T) {
 			ctx,
 			&types.AccountCoinsRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
@@ -468,7 +468,7 @@ func TestAccountCoins(t *testing.T) {
 			ctx,
 			&types.AccountCoinsRequest{
 				NetworkIdentifier: &types.NetworkIdentifier{
-					Network: constants.FujiNetwork,
+					Network: constants.TestnetNetwork,
 					SubNetworkIdentifier: &types.SubNetworkIdentifier{
 						Network: constants.PChain.String(),
 					},
