@@ -256,7 +256,7 @@ func TestCrossChainImportedInputs(t *testing.T) {
 		tx          = &evm.Tx{}
 
 		networkIdentifier = &types.NetworkIdentifier{
-			Network: constants.FujiNetwork,
+			Network: constants.TestnetNetwork,
 		}
 		chainIDToAliasMapping = map[ids.ID]constants.ChainIDAlias{
 			ids.Empty: constants.PChain,
@@ -309,7 +309,7 @@ func TestCrossChainExportedOuts(t *testing.T) {
 		tx          = &evm.Tx{}
 
 		networkIdentifier = &types.NetworkIdentifier{
-			Network: constants.FujiNetwork,
+			Network: constants.TestnetNetwork,
 		}
 		chainIDToAliasMapping = map[ids.ID]constants.ChainIDAlias{
 			ids.Empty: constants.PChain,

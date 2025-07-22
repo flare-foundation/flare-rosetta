@@ -32,8 +32,8 @@ func EqualFoldContains(arr []string, str string) bool {
 func GetHRP(networkIdentifier *types.NetworkIdentifier) (string, error) {
 	var hrp string
 	switch strings.ToLower(networkIdentifier.Network) {
-	case rosConst.FujiNetwork:
-		hrp = constants.GetHRP(constants.FujiID)
+	case rosConst.TestnetNetwork:
+		hrp = constants.GetHRP(constants.TestnetID)
 	case rosConst.MainnetNetwork:
 		hrp = constants.GetHRP(constants.MainnetID)
 	default:

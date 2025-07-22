@@ -26,7 +26,7 @@ import (
 var (
 	networkIdentifier = &types.NetworkIdentifier{
 		Blockchain: service.BlockchainName,
-		Network:    constants.FujiNetwork,
+		Network:    constants.TestnetNetwork,
 	}
 
 	cAccountIdentifier       = &types.AccountIdentifier{Address: "0x3158e80abD5A1e1aa716003C9Db096792C379621"}
