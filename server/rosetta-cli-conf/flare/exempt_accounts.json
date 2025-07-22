@@ -52,5 +52,32 @@
             "symbol": "FLR",
             "decimals": 18
         }
+    },
+    {
+        "account_identifier": {
+            "address": "0xbe653C54DF337F13Fcb726101388F4a4803049F3"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xF09fc2658270ac5494fa365dc5e29E0a2c636413"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
+    },
+    {
+        "account_identifier": {
+            "address": "0xbe653C54DF337F13Fcb726101388F4a4803049F3"
+        },
+        "currency": {
+            "symbol": "FLR",
+            "decimals": 18
+        }
     }
 ]

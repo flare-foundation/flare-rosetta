@@ -20,3 +20,4 @@ data
 .vscode*
 __debug_bin*
 build_docker.sh
+.idea
