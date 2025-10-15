@@ -17,16 +17,25 @@ jobs:
     outputs:
       IMAGE_TAG: ${{ steps.ct_image_tag.outputs.IMAGE_TAG }}
       IMAGE_PATH_0: ghcr.io/${{ github.repository }}
+      ROSETTA_BRANCH: ${{ steps.ct_image_tag.outputs.ROSETTA_BRANCH }}
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - id: ct_image_tag
       run: |
-        TAG_NORMALIZED=$(echo ${GITHUB_REF#refs/*/} | sed "s/[^[:alpha:]0-9.-]/-/g")
+        # For pull requests, use GITHUB_HEAD_REF (source branch of PR)
+        # For push events, extract branch name from GITHUB_REF
+        if [ -n "$GITHUB_HEAD_REF" ]; then
+          BRANCH_NAME=$GITHUB_HEAD_REF
+        else
+          BRANCH_NAME=${GITHUB_REF#refs/*/}
+        fi
+        TAG_NORMALIZED=$(echo "$BRANCH_NAME" | sed "s/[^[:alpha:]0-9.-]/-/g")
         if [[ "$TAG_NORMALIZED" == "main" ]]; then echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
         else echo "IMAGE_TAG=$TAG_NORMALIZED" >> $GITHUB_OUTPUT
         fi
+        echo "ROSETTA_BRANCH=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
   build-container:
     runs-on: ubuntu-latest
@@ -49,7 +58,7 @@ jobs:
     - name: Build and push container image
       shell: bash
       run: |
-        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} -f ./server/Dockerfile .
+        docker build --progress=plain --no-cache --build-arg ROSETTA_SRC=. --build-arg ROSETTA_BRANCH=${{ needs.define-env.outputs.ROSETTA_BRANCH }} --tag ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }} -f ./server/Dockerfile .
         docker push ${{ needs.define-env.outputs.IMAGE_PATH_0 }}:${{ needs.define-env.outputs.IMAGE_TAG }}
     - name: get image sha256
       id: image_sha256

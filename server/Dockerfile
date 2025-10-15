@@ -20,8 +20,9 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 FROM golang:1.22 AS rosetta
 
-ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/main.zip
-ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-main
+ARG ROSETTA_BRANCH=main
+ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/${ROSETTA_BRANCH}.zip
+ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-${ROSETTA_BRANCH}
 
 WORKDIR /tmp
 
@@ -44,7 +45,6 @@ RUN \
   GO_VERSION=$(go version | awk {'print $3'}) \
   GIT_COMMIT=main \
   go mod download && \
-  go mod vendor && \
   make setup && \
   make build
 
