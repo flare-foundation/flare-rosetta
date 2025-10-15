@@ -88,9 +88,10 @@ func (c *config) validate() error {
 		return errors.New("network name not provided")
 	}
 
-	if _, err := constants.NetworkID(c.NetworkName); err != nil {
-		return fmt.Errorf("network name %q not mapping to any known network ID", c.NetworkName)
-	}
+	// TODO: Re-enable network name validation once we use go-flare's avalanchego fork
+	// if _, err := constants.NetworkID(c.NetworkName); err != nil {
+	// 	return fmt.Errorf("network name %q not mapping to any known network ID", c.NetworkName)
+	// }
 
 	if c.GenesisBlockHash == "" {
 		return errGenesisBlockRequired
