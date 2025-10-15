@@ -142,9 +142,6 @@ jobs:
     needs:
     - build-container
     - define-env
-    strategy:
-      fail-fast: false
-      matrix:
     services:
       flare_node:
         image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
