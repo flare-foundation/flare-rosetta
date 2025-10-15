@@ -5,7 +5,7 @@ FROM golang:1.22 AS flare
 
 WORKDIR /app
 
-ARG GO_FLARE_VERSION=v1.11.0
+ARG GO_FLARE_VERSION=v1.11.13-rc0
 ARG GO_FLARE_REPO=https://github.com/flare-foundation/go-flare
 
 RUN git clone --branch "$GO_FLARE_VERSION" "${GO_FLARE_REPO}" .
@@ -44,6 +44,7 @@ RUN \
   GO_VERSION=$(go version | awk {'print $3'}) \
   GIT_COMMIT=main \
   go mod download && \
+  go mod vendor && \
   make setup && \
   make build
 

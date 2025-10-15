@@ -67,7 +67,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        index: [1, 2, 3, 4, 5]
         START_ROSETTA_SERVER_AFTER_BOOTSTRAP: [true, false]
     services:
       flare_node:
@@ -81,7 +80,7 @@ jobs:
           NETWORK_ID: localflare
           FLARE_LOCAL_TXS_ENABLED: true
           START_ROSETTA_SERVER_AFTER_BOOTSTRAP: ${{ matrix.START_ROSETTA_SERVER_AFTER_BOOTSTRAP }}
-          EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key
+          EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/flare/staking/local/staker1.crt --staking-tls-key-file=/app/flare/staking/local/staker1.key --staking-signer-key-file=/app/flare/staking/local/signer1.key
         options: >-
           --health-interval 15s
           --health-timeout 15s
@@ -146,7 +145,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        index: [1, 2, 3, 4, 5]
     services:
       flare_node:
         image: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
@@ -183,10 +181,6 @@ jobs:
           --header 'Content-Type: application/json' \
           --data-raw '{ "metadata" : {} }' \
           --fail || exit 1
-
-
-
-
 
   test-make_build:
     runs-on: ubuntu-latest
