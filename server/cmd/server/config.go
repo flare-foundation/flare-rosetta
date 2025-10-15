@@ -88,7 +88,7 @@ func (c *config) validate() error {
 	}
 
 	if _, err := constants.NetworkID(c.NetworkName); err != nil {
-		return errors.New("network name not mapping to any known network ID")
+		return fmt.Errorf("network name %q not mapping to any known network ID", c.NetworkName)
 	}
 
 	if c.GenesisBlockHash == "" {
