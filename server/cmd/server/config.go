@@ -88,7 +88,7 @@ func (c *config) validate() error {
 		return errors.New("network name not provided")
 	}
 
-	if _, err := constants.NetworkID(c.NetworkName); err != nil {
+	if !mapper.IsSupportedHRP(c.NetworkName) {
 		return fmt.Errorf("network name %q not mapping to any known network ID", c.NetworkName)
 	}
 

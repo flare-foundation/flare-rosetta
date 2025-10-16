@@ -8,12 +8,9 @@ import (
 	"strings"
 
 	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 	"github.com/coinbase/rosetta-sdk-go/types"
-
-	rosConst "github.com/ava-labs/avalanche-rosetta/constants"
 )
 
 var errUnrecognizedNetwork = errors.New("can't recognize network")
@@ -30,17 +27,10 @@ func EqualFoldContains(arr []string, str string) bool {
 
 // GetHRP fetches hrp for address formatting.
 func GetHRP(networkIdentifier *types.NetworkIdentifier) (string, error) {
-	var hrp string
-	switch strings.ToLower(networkIdentifier.Network) {
-	case rosConst.TestnetNetwork:
-		hrp = constants.GetHRP(constants.TestnetID)
-	case rosConst.MainnetNetwork:
-		hrp = constants.GetHRP(constants.MainnetID)
-	default:
-		return "", errUnrecognizedNetwork
+	if IsSupportedHRP(networkIdentifier.Network) {
+		return networkIdentifier.Network, nil
 	}
-
-	return hrp, nil
+	return "", errUnrecognizedNetwork
 }
 
 // UnmarshalJSONMap converts map[string]interface{} into a interface{}.

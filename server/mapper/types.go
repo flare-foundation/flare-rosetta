@@ -8,12 +8,15 @@ import (
 const (
 	FlareChainID = 14
 	FlareAssetID = "2MxKSeEWXViLdYyDhW1SQ46AECZEbE2bnVRZptv42JrxqyUX5k"
+	FlareHRP     = "flare"
 
 	CostwoChainID = 114
 	CostwoAssetID = "fxMAKpBQQpFedrUhWMsDYfCUJxdUw4mneTczKBzNg3rc2JUub"
+	CostwoHRP     = "costwo"
 
 	LocalFlareChainID = 162
 	LocalFlareAssetID = "QJx3BomP9MGxCy5RPVXyNUeEqzduvuNbxQVXMuPKDakacdY6K"
+	LocalFlareHRP     = "localflare"
 
 	ContractAddressMetadata  = "contractAddress"
 	IndexTransferredMetadata = "indexTransferred"
@@ -104,6 +107,18 @@ var (
 	CallMethods = []string{
 		"eth_getTransactionReceipt",
 	}
+
+	ChainIDToHRP = map[uint32]string{
+		FlareChainID:      FlareHRP,
+		CostwoChainID:     CostwoHRP,
+		LocalFlareChainID: LocalFlareHRP,
+	}
+
+	HRPToChainID = map[string]uint32{
+		FlareHRP:      FlareChainID,
+		CostwoHRP:     CostwoChainID,
+		LocalFlareHRP: LocalFlareChainID,
+	}
 )
 
 func CallType(t string) bool {
@@ -146,4 +161,14 @@ func ToCurrency(symbol string, decimals uint8, contractAddress common.Address) *
 			ContractAddressMetadata: contractAddress.Hex(),
 		},
 	}
+}
+
+func IsSupportedNetworkID(id uint32) bool {
+	_, ok := ChainIDToHRP[id]
+	return ok
+}
+
+func IsSupportedHRP(hrp string) bool {
+	_, ok := HRPToChainID[hrp]
+	return ok
 }
