@@ -6,6 +6,7 @@ set -e
 NETWORK_ID=localflare
 ROSETTA_IMAGE="${ROSETTA_IMAGE:-rosetta-local}"
 START_ROSETTA_SERVER_AFTER_BOOTSTRAP=${START_ROSETTA_SERVER_AFTER_BOOTSTRAP:-false}
+MODE="${MODE:-online}"
 ROSETTA_PORT=8080
 CI="${CI:-false}"
 
@@ -57,7 +58,7 @@ if [ ! $CI ]; then
       .
 fi
 
-ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP docker compose -f server/docker/docker-compose.yml up -d
+ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP MODE=$MODE docker compose -f server/docker/docker-compose.yml up -d
 
 while true; do
     HEALTHY="$(curl -m 10 -s "http://localhost:9650/ext/health" | jq -r ".healthy")"
@@ -141,7 +142,7 @@ else
 fi
 
 cd ..
-ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP docker compose -f server/docker/docker-compose.yml down
+ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP MODE=$MODE docker compose -f server/docker/docker-compose.yml down
 
 echo ""
 log_info "✅ All tests passed!"
