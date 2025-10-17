@@ -1,20 +1,22 @@
 package mapper
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
 	FlareChainID = 14
 	FlareAssetID = "2MxKSeEWXViLdYyDhW1SQ46AECZEbE2bnVRZptv42JrxqyUX5k"
+	FlareHRP     = "flare"
 
 	CostwoChainID = 114
 	CostwoAssetID = "fxMAKpBQQpFedrUhWMsDYfCUJxdUw4mneTczKBzNg3rc2JUub"
+	CostwoHRP     = "costwo"
 
 	LocalFlareChainID = 162
 	LocalFlareAssetID = "QJx3BomP9MGxCy5RPVXyNUeEqzduvuNbxQVXMuPKDakacdY6K"
+	LocalFlareHRP     = "localflare"
 
 	ContractAddressMetadata  = "contractAddress"
 	IndexTransferredMetadata = "indexTransferred"
@@ -41,6 +43,12 @@ const (
 
 	StatusSuccess = "SUCCESS"
 	StatusFailure = "FAILURE"
+
+	MetadataTxFee           = "tx_fee"
+	MetadataImportedInputs  = "imported_inputs"
+	MetadataExportedOutputs = "exported_outputs"
+	MetadataAddressFormat   = "address_format"
+	AddressFormatBech32     = "bech32"
 )
 
 var (
@@ -57,6 +65,11 @@ var (
 	FlareCurrency = &types.Currency{
 		Symbol:   "FLR",
 		Decimals: 18,
+	}
+
+	AtomicAvaxCurrency = &types.Currency{
+		Symbol:   "AVAX",
+		Decimals: 9,
 	}
 
 	OperationStatuses = []*types.OperationStatus{
@@ -93,6 +106,19 @@ var (
 
 	CallMethods = []string{
 		"eth_getTransactionReceipt",
+	}
+
+	ChainIDToHRP = map[uint32]string{
+		FlareChainID:      FlareHRP,
+		CostwoChainID:     CostwoHRP,
+		LocalFlareChainID: LocalFlareHRP,
+	}
+
+	HRPToChainID = map[string]uint32{
+		FlareHRP:      FlareChainID,
+		CostwoHRP:     CostwoChainID,
+		LocalFlareHRP: LocalFlareChainID,
+		"fuji":        CostwoChainID, // Alias for backwards compatibility with tests
 	}
 )
 
@@ -136,4 +162,14 @@ func ToCurrency(symbol string, decimals uint8, contractAddress common.Address) *
 			ContractAddressMetadata: contractAddress.Hex(),
 		},
 	}
+}
+
+func IsSupportedNetworkID(id uint32) bool {
+	_, ok := ChainIDToHRP[id]
+	return ok
+}
+
+func IsSupportedHRP(hrp string) bool {
+	_, ok := HRPToChainID[hrp]
+	return ok
 }

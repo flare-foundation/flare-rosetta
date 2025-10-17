@@ -5,7 +5,7 @@ FROM golang:1.22 AS flare
 
 WORKDIR /app
 
-ARG GO_FLARE_VERSION=v1.11.0
+ARG GO_FLARE_VERSION=v1.11.13-rc0
 ARG GO_FLARE_REPO=https://github.com/flare-foundation/go-flare
 
 RUN git clone --branch "$GO_FLARE_VERSION" "${GO_FLARE_REPO}" .
@@ -20,8 +20,9 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 FROM golang:1.22 AS rosetta
 
-ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/main.zip
-ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-main
+ARG ROSETTA_BRANCH=main
+ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/${ROSETTA_BRANCH}.zip
+ARG ROSETTA_SRC_ZIP_SUBFOLDER=flare-rosetta-${ROSETTA_BRANCH}
 
 WORKDIR /tmp
 

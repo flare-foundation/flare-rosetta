@@ -1,0 +1,118 @@
+services:
+  validator1:
+    image: ghcr.io/flare-foundation/go-flare:v1.11.13-rc0
+    environment:
+      LOG_LEVEL: info
+      NETWORK_ID: localflare
+      AUTOCONFIGURE_PUBLIC_IP: 0
+      AUTOCONFIGURE_BOOTSTRAP: 0
+      PUBLIC_IP: 10.20.30.1
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker1.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker1.key --staking-signer-key-file=/app/avalanchego/staking/local/signer1.key
+    ports:
+      - 9650:9650
+      - 9651:9651
+    volumes:
+      - ./localflare:/app/avalanchego/staking/local:ro
+    networks:
+      nodes:
+        ipv4_address: 10.20.30.1
+    healthcheck:
+      test: curl localhost:9650/ext/health
+
+  validator2:
+    image: ghcr.io/flare-foundation/go-flare:v1.11.13-rc0
+    environment:
+      LOG_LEVEL: info
+      NETWORK_ID: localflare
+      AUTOCONFIGURE_PUBLIC_IP: 0
+      AUTOCONFIGURE_BOOTSTRAP: 0
+      PUBLIC_IP: 10.20.30.2
+      BOOTSTRAP_IPS: 10.20.30.1:9651
+      BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker2.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker2.key --staking-signer-key-file=/app/avalanchego/staking/local/signer2.key
+    volumes:
+      - ./localflare:/app/avalanchego/staking/local:ro
+    networks:
+      nodes:
+        ipv4_address: 10.20.30.2
+
+  validator3:
+    image: ghcr.io/flare-foundation/go-flare:v1.11.13-rc0
+    environment:
+      LOG_LEVEL: info
+      NETWORK_ID: localflare
+      AUTOCONFIGURE_PUBLIC_IP: 0
+      AUTOCONFIGURE_BOOTSTRAP: 0
+      STAKER_INDEX: 3
+      PUBLIC_IP: 10.20.30.3
+      BOOTSTRAP_IPS: 10.20.30.1:9651
+      BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker3.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker3.key --staking-signer-key-file=/app/avalanchego/staking/local/signer3.key
+    volumes:
+      - ./localflare:/app/avalanchego/staking/local:ro
+    networks:
+      nodes:
+        ipv4_address: 10.20.30.3
+
+  validator4:
+    image: ghcr.io/flare-foundation/go-flare:v1.11.13-rc0
+    environment:
+      LOG_LEVEL: info
+      NETWORK_ID: localflare
+      AUTOCONFIGURE_PUBLIC_IP: 0
+      AUTOCONFIGURE_BOOTSTRAP: 0
+      PUBLIC_IP: 10.20.30.4
+      BOOTSTRAP_IPS: 10.20.30.1:9651
+      BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker4.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker4.key --staking-signer-key-file=/app/avalanchego/staking/local/signer4.key
+    volumes:
+      - ./localflare:/app/avalanchego/staking/local:ro
+    networks:
+      nodes:
+        ipv4_address: 10.20.30.4
+
+  validator5:
+    image: ghcr.io/flare-foundation/go-flare:v1.11.13-rc0
+    environment:
+      LOG_LEVEL: info
+      NETWORK_ID: localflare
+      AUTOCONFIGURE_PUBLIC_IP: 0
+      AUTOCONFIGURE_BOOTSTRAP: 0
+      PUBLIC_IP: 10.20.30.5
+      BOOTSTRAP_IPS: 10.20.30.1:9651
+      BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker5.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker5.key --staking-signer-key-file=/app/avalanchego/staking/local/signer5.key
+    volumes:
+      - ./localflare:/app/avalanchego/staking/local:ro
+    networks:
+      nodes:
+        ipv4_address: 10.20.30.5
+
+  rosetta:
+    image: ${ROSETTA_IMAGE}
+    environment:
+      LOG_LEVEL: info
+      NETWORK_ID: localflare
+      AUTOCONFIGURE_PUBLIC_IP: 0
+      AUTOCONFIGURE_BOOTSTRAP: 0
+      PUBLIC_IP: 10.20.30.6
+      BOOTSTRAP_IPS: 10.20.30.1:9651
+      BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+      FLARE_LOCAL_TXS_ENABLED: true
+      START_ROSETTA_SERVER_AFTER_BOOTSTRAP: ${START_ROSETTA_SERVER_AFTER_BOOTSTRAP}
+      MODE: ${MODE}
+    ports:
+      - 8080:8080
+    depends_on:
+      - validator1
+    networks:
+      nodes:
+        ipv4_address: 10.20.30.6
+
+networks:
+  nodes:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+          gateway: 10.20.30.254

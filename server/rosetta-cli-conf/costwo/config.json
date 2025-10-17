@@ -24,9 +24,9 @@
     },
     "prefunded_accounts": [
       {
-        "privkey": "",
+        "privkey": "private-key-for-that-address",
         "account_identifier": {
-          "address": "0xcb00566863A90DBa5fE56e9a7e4Cf310c24e6506"
+          "address": "public-address-prefunded-with-faucet"
         },
         "curve_type": "secp256k1",
         "currency": {

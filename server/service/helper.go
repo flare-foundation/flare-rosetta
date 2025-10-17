@@ -2,20 +2,21 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"math/big"
 	"strings"
 
-	"github.com/ava-labs/avalanche-rosetta/client"
 	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/ava-labs/avalanche-rosetta/client"
 
 	ethtypes "github.com/ava-labs/coreth/core/types"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const (
 	nativeTransferGasLimit = uint64(21000)
 	erc20TransferGasLimit  = uint64(250000)
+	unwrapGasLimit         = uint64(750000)
 	genesisTimestamp       = 946713601000 // min allowable timestamp
 )
 
@@ -47,46 +48,21 @@ func blockHeaderFromInput(
 		header, err = c.HeaderByNumber(ctx, nil)
 	} else {
 		if input.Hash == nil && input.Index == nil {
-			return nil, errInvalidInput
+			return nil, ErrInvalidInput
 		}
 
 		if input.Index != nil {
 			header, err = c.HeaderByNumber(ctx, big.NewInt(*input.Index))
 		} else {
-			header, err = c.HeaderByHash(ctx, ethcommon.HexToHash(*input.Hash))
+			header, err = c.HeaderByHash(ctx, common.HexToHash(*input.Hash))
 		}
 	}
 
 	if err != nil {
-		return nil, wrapError(errInternalError, err)
+		return nil, WrapError(ErrInternalError, err)
 	}
 
 	return header, nil
-}
-
-// unmarshalJSONMap converts map[string]interface{} into a interface{}.
-func unmarshalJSONMap(m map[string]interface{}, i interface{}) error {
-	b, err := json.Marshal(m)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(b, i)
-}
-
-// marshalJSONMap converts an interface into a map[string]interface{}.
-func marshalJSONMap(i interface{}) (map[string]interface{}, error) {
-	b, err := json.Marshal(i)
-	if err != nil {
-		return nil, err
-	}
-
-	var m map[string]interface{}
-	if err := json.Unmarshal(b, &m); err != nil {
-		return nil, err
-	}
-
-	return m, nil
 }
 
 // ChecksumAddress ensures an Ethereum hex address
@@ -97,7 +73,7 @@ func ChecksumAddress(address string) (string, bool) {
 		return "", false
 	}
 
-	addr, err := ethcommon.NewMixedcaseAddressFromString(address)
+	addr, err := common.NewMixedcaseAddressFromString(address)
 	if err != nil {
 		return "", false
 	}

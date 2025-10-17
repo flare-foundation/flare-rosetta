@@ -4,14 +4,22 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"strconv"
 	"strings"
 
-	ethtypes "github.com/ava-labs/coreth/core/types"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/coreth/core"
 	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	clientTypes "github.com/ava-labs/avalanche-rosetta/client"
+	"github.com/ava-labs/avalanche-rosetta/client"
+	"github.com/ava-labs/avalanche-rosetta/constants"
+
+	ethtypes "github.com/ava-labs/coreth/core/types"
 )
 
 const (
@@ -22,7 +30,7 @@ const (
 )
 
 var (
-	x2crate     = big.NewInt(1000000000)
+	X2crate     = big.NewInt(1000000000)
 	zeroAddress = common.Address{}
 
 	burnAddress              = common.HexToAddress("0x000000000000000000000000000000000000dEaD")
@@ -37,23 +45,23 @@ var (
 func Transaction(
 	header *ethtypes.Header,
 	tx *ethtypes.Transaction,
-	msg *ethtypes.Message,
+	msg *core.Message,
 	receipt *ethtypes.Receipt,
-	trace *clientTypes.Call,
-	flattenedTrace []*clientTypes.FlatCall,
-	client clientTypes.Client,
+	trace *client.Call,
+	flattenedTrace []*client.FlatCall,
+	rpcClient client.Client,
 	isAnalyticsMode bool,
 	standardModeWhiteList []string,
 	includeUnknownTokens bool,
 ) (*types.Transaction, error) {
 	ops := []*types.Operation{}
-	sender := msg.From()
+	sender := msg.From
 	feeReceiver := &burnAddress
 
 	txFee := new(big.Int).SetUint64(receipt.GasUsed)
-	txFee = txFee.Mul(txFee, msg.GasPrice())
+	txFee = txFee.Mul(txFee, msg.GasPrice)
 
-	if msg.To() != nil && *msg.To() == ftsoContractAddress && receipt.Status == ethtypes.ReceiptStatusSuccessful && tx.Gas() <= ftsoGasRefundLimit {
+	if msg.To != nil && *msg.To == ftsoContractAddress && receipt.Status == ethtypes.ReceiptStatusSuccessful && tx.Gas() <= ftsoGasRefundLimit {
 		txFee = ftsoTxFee
 	}
 
@@ -100,24 +108,24 @@ func Transaction(
 
 		switch len(log.Topics) {
 		case topicsInErc721Transfer:
-			symbol, _, err := client.GetContractInfo(log.Address, false)
+			symbol, _, err := rpcClient.GetContractInfo(log.Address, false)
 			if err != nil {
 				return nil, err
 			}
 
-			if symbol == clientTypes.UnknownERC721Symbol && !includeUnknownTokens {
+			if symbol == client.UnknownERC721Symbol && !includeUnknownTokens {
 				continue
 			}
 
 			erc721Ops := erc721Ops(log, int64(len(ops)))
 			ops = append(ops, erc721Ops...)
 		case topicsInErc20Transfer:
-			symbol, decimals, err := client.GetContractInfo(log.Address, true)
+			symbol, decimals, err := rpcClient.GetContractInfo(log.Address, true)
 			if err != nil {
 				return nil, err
 			}
 
-			if symbol == clientTypes.UnknownERC20Symbol && !includeUnknownTokens {
+			if symbol == client.UnknownERC20Symbol && !includeUnknownTokens {
 				continue
 			}
 
@@ -143,18 +151,25 @@ func Transaction(
 }
 
 func crossChainTransaction(
+	networkIdentifier *types.NetworkIdentifier,
+	chainIDToAliasMapping map[ids.ID]constants.ChainIDAlias,
 	rawIdx int,
 	flrAssetID string,
 	tx *evm.Tx,
-) ([]*types.Operation, error) {
+) ([]*types.Operation, map[string]interface{}, error) {
 	var (
-		ops = []*types.Operation{}
-		idx = int64(rawIdx)
+		ops          = []*types.Operation{}
+		exportedOuts = []*types.Operation{}
+		idx          = int64(rawIdx)
+		metadata     = map[string]interface{}{}
+
+		totalInputAmount  = big.NewInt(0)
+		totalOutputAmount = big.NewInt(0)
 	)
 
 	// Prepare transaction for ID calcuation
 	if err := tx.Sign(evm.Codec, nil); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	switch t := tx.UnsignedAtomicTx.(type) {
@@ -164,6 +179,7 @@ func crossChainTransaction(
 		mTxIDs := map[string]struct{}{}
 		for _, in := range t.ImportedInputs {
 			mTxIDs[in.TxID.String()] = struct{}{}
+			totalInputAmount.Add(totalInputAmount, big.NewInt(int64(in.In.Amount())))
 		}
 		i := 0
 		txIDs := make([]string, len(mTxIDs))
@@ -177,6 +193,9 @@ func crossChainTransaction(
 				continue
 			}
 
+			outAmount := new(big.Int).SetUint64(out.Amount)
+			totalOutputAmount.Add(totalOutputAmount, outAmount)
+
 			op := &types.Operation{
 				OperationIdentifier: &types.OperationIdentifier{
 					Index: idx,
@@ -187,7 +206,7 @@ func crossChainTransaction(
 					Address: out.Address.Hex(),
 				},
 				Amount: &types.Amount{
-					Value:    new(big.Int).Mul(new(big.Int).SetUint64(out.Amount), x2crate).String(),
+					Value:    new(big.Int).Mul(new(big.Int).SetUint64(out.Amount), X2crate).String(),
 					Currency: FlareCurrency,
 				},
 				Metadata: map[string]interface{}{
@@ -209,6 +228,10 @@ func crossChainTransaction(
 				continue
 			}
 
+			// Add input amounts to tx fee
+			inAmount := new(big.Int).SetUint64(in.Amount)
+			totalInputAmount.Add(totalInputAmount, inAmount)
+
 			op := &types.Operation{
 				OperationIdentifier: &types.OperationIdentifier{
 					Index: idx,
@@ -219,7 +242,7 @@ func crossChainTransaction(
 					Address: in.Address.Hex(),
 				},
 				Amount: &types.Amount{
-					Value:    new(big.Int).Mul(new(big.Int).SetUint64(in.Amount), new(big.Int).Neg(x2crate)).String(),
+					Value:    new(big.Int).Mul(inAmount, new(big.Int).Neg(X2crate)).String(),
 					Currency: FlareCurrency,
 				},
 				Metadata: map[string]interface{}{
@@ -233,14 +256,89 @@ func crossChainTransaction(
 			}
 			ops = append(ops, op)
 			idx++
+
+			if alias, ok := chainIDToAliasMapping[t.DestinationChain]; t.ExportedOutputs != nil && ok {
+				operations, totalExportedAmount, err := createExportedOuts(networkIdentifier, alias, t.ID(), t.ExportedOutputs)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				exportedOuts = append(exportedOuts, operations...)
+				metadata[MetadataExportedOutputs] = exportedOuts
+				totalOutputAmount.Add(totalOutputAmount, totalExportedAmount)
+			}
 		}
 	default:
-		return nil, fmt.Errorf("unsupported transaction: %T", t)
+		return nil, nil, fmt.Errorf("unsupported transaction: %T", t)
 	}
-	return ops, nil
+
+	// Adding operation identifiers to exported outs here since OperationIdentifier is a required field in the spec.
+	// As Rosetta does not allow gaps in operation identifiers within the same transaction,
+	// setting the identifier is deferred to here and all operations in the transaction are given sequential indices
+	for i, exportedOut := range exportedOuts {
+		exportedOut.OperationIdentifier = &types.OperationIdentifier{
+			Index: idx + int64(i),
+		}
+	}
+
+	// tx fee is the diff between sums of input/importedInput and output/exportedOutput amounts
+	txFeeAtomicAvax := new(big.Int).Sub(totalInputAmount, totalOutputAmount)
+	metadata[MetadataTxFee] = AtomicAvaxAmount(txFeeAtomicAvax)
+
+	return ops, metadata, nil
+}
+
+func createExportedOuts(
+	networkIdentifier *types.NetworkIdentifier,
+	chainAlias constants.ChainIDAlias,
+	txID ids.ID,
+	exportedOuts []*avax.TransferableOutput,
+) ([]*types.Operation, *big.Int, error) {
+	hrp, err := GetHRP(networkIdentifier)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	operations := []*types.Operation{}
+	totalAmount := big.NewInt(0)
+	for outIndex, out := range exportedOuts {
+		var addr string
+		transferOutput := out.Output().(*secp256k1fx.TransferOutput)
+		if transferOutput != nil && len(transferOutput.Addrs) > 0 {
+			var err error
+			addr, err = address.Format(chainAlias.String(), hrp, transferOutput.Addrs[0][:])
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+
+		utxoID := &avax.UTXOID{
+			TxID:        txID,
+			OutputIndex: uint32(outIndex),
+		}
+
+		totalAmount.Add(totalAmount, new(big.Int).SetUint64(out.Out.Amount()))
+
+		operations = append(operations, &types.Operation{
+			Account: &types.AccountIdentifier{Address: addr},
+			Type:    OpExport,
+			Status:  types.String(StatusSuccess),
+			Amount: &types.Amount{
+				Value:    strconv.FormatUint(out.Out.Amount(), 10),
+				Currency: AtomicAvaxCurrency,
+			},
+			CoinChange: &types.CoinChange{
+				CoinIdentifier: &types.CoinIdentifier{Identifier: utxoID.String()},
+				CoinAction:     types.CoinCreated,
+			},
+		})
+	}
+	return operations, totalAmount, nil
 }
 
 func CrossChainTransactions(
+	networkIdentifier *types.NetworkIdentifier,
+	chainIDToAliasMapping map[ids.ID]constants.ChainIDAlias,
 	flrAssetID string,
 	block *ethtypes.Block,
 	ap5Activation uint64,
@@ -257,32 +355,28 @@ func CrossChainTransactions(
 		return nil, err
 	}
 
-	ops := []*types.Operation{}
 	for _, tx := range atomicTxs {
-		txOps, err := crossChainTransaction(len(ops), flrAssetID, tx)
+		txOps, metadata, err := crossChainTransaction(networkIdentifier, chainIDToAliasMapping, 0, flrAssetID, tx)
 		if err != nil {
 			return nil, err
 		}
-		ops = append(ops, txOps...)
-	}
 
-	// TODO: migrate to using atomic transaction ID instead of marking as a block
-	// transaction
-	//
-	// NOTE: We need to be very careful about this because it will require
-	// integrators to re-index the chain to get the new result.
-	transactions = append(transactions, &types.Transaction{
-		TransactionIdentifier: &types.TransactionIdentifier{
-			Hash: block.Hash().String(),
-		},
-		Operations: ops,
-	})
+		transaction := &types.Transaction{
+			TransactionIdentifier: &types.TransactionIdentifier{
+				Hash: tx.ID().String(),
+			},
+			Operations: txOps,
+			Metadata:   metadata,
+		}
+
+		transactions = append(transactions, transaction)
+	}
 
 	return transactions, nil
 }
 
 // MempoolTransactionsIDs returns a list of transction IDs in the mempool
-func MempoolTransactionsIDs(accountMap clientTypes.TxAccountMap) []*types.TransactionIdentifier {
+func MempoolTransactionsIDs(accountMap client.TxAccountMap) []*types.TransactionIdentifier {
 	result := []*types.TransactionIdentifier{}
 
 	for _, txNonceMap := range accountMap {
@@ -299,7 +393,7 @@ func MempoolTransactionsIDs(accountMap clientTypes.TxAccountMap) []*types.Transa
 	return result
 }
 
-func traceOps(trace []*clientTypes.FlatCall, startIndex int) []*types.Operation {
+func traceOps(trace []*client.FlatCall, startIndex int) []*types.Operation {
 	ops := []*types.Operation{}
 	if len(trace) == 0 {
 		return ops
@@ -371,7 +465,7 @@ func traceOps(trace []*clientTypes.FlatCall, startIndex int) []*types.Operation 
 		if call.Type == OpSelfDestruct {
 			destroyedAccounts[from] = new(big.Int)
 
-			// If destination of of SELFDESTRUCT is self,
+			// If destination of SELFDESTRUCT is self,
 			// we should skip. In the EVM, the balance is reset
 			// after the balance is increased on the destination
 			// so this is a no-op.

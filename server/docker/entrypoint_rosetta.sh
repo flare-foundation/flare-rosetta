@@ -56,7 +56,7 @@ if [ "$MODE" = "online" ]; then
         sleep 1
     done
 
-    jq --arg c "${ROSETTA_FLARE_ENDPOINT}" '.rpc_endpoint=$c' "${ROSETTA_CONFIG_PATH}" | sponge "${ROSETTA_CONFIG_PATH}"
+    jq --arg c "${ROSETTA_FLARE_ENDPOINT}" '.rpc_base_url=$c' "${ROSETTA_CONFIG_PATH}" | sponge "${ROSETTA_CONFIG_PATH}"
 
 fi
 

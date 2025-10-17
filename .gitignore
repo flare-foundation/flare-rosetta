@@ -21,3 +21,4 @@ data
 __debug_bin*
 build_docker.sh
 .idea
+tmp/
