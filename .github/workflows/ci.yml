@@ -76,6 +76,12 @@ jobs:
       fail-fast: true
       matrix:
         START_ROSETTA_SERVER_AFTER_BOOTSTRAP: [true, false]
+        MODE: [offline, online]
+        exclude:
+          - START_ROSETTA_SERVER_AFTER_BOOTSTRAP: true
+            MODE: offline
+          - START_ROSETTA_SERVER_AFTER_BOOTSTRAP: false
+            MODE: online
     steps:
     - uses: actions/checkout@v3
 
