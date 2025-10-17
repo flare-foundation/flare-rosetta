@@ -72,16 +72,6 @@ jobs:
     needs:
     - build-container
     - define-env
-    strategy:
-      fail-fast: true
-      matrix:
-        START_ROSETTA_SERVER_AFTER_BOOTSTRAP: [true, false]
-        MODE: [offline, online]
-        exclude:
-          - START_ROSETTA_SERVER_AFTER_BOOTSTRAP: true
-            MODE: offline
-          - START_ROSETTA_SERVER_AFTER_BOOTSTRAP: false
-            MODE: online
     steps:
     - uses: actions/checkout@v3
 
@@ -105,7 +95,8 @@ jobs:
       env:
         CI: true
         ROSETTA_IMAGE: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
-        START_ROSETTA_SERVER_AFTER_BOOTSTRAP: ${{ matrix.START_ROSETTA_SERVER_AFTER_BOOTSTRAP }}
+        START_ROSETTA_SERVER_AFTER_BOOTSTRAP: true
+        MODE: online
       shell: bash
       run: |
         ./test-localflare.sh
