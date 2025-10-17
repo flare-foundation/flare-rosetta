@@ -118,6 +118,7 @@ var (
 		FlareHRP:      FlareChainID,
 		CostwoHRP:     CostwoChainID,
 		LocalFlareHRP: LocalFlareChainID,
+		"fuji":        CostwoChainID, // Alias for backwards compatibility with tests
 	}
 )
 

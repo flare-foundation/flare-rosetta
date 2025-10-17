@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/ava-labs/avalanche-rosetta/client"
@@ -143,6 +142,5 @@ func (c *config) validateWhitelistOnlyValidErc20s(cli client.Client) error {
 
 func (c *config) avalancheNetworkID() uint32 {
 	// error checked in config.validate
-	res, _ := constants.NetworkID(c.NetworkName)
-	return res
+	return mapper.HRPToChainID[c.NetworkName]
 }

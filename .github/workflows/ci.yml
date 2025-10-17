@@ -97,6 +97,7 @@ jobs:
 
     - name: Run localflare test script
       env:
+        CI: true
         ROSETTA_IMAGE: ${{ needs.define-env.outputs.IMAGE_PATH_0 }}@${{ needs.build-container.outputs.IMAGE_SHA256_0 }}
         START_ROSETTA_SERVER_AFTER_BOOTSTRAP: ${{ matrix.START_ROSETTA_SERVER_AFTER_BOOTSTRAP }}
       shell: bash

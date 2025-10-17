@@ -7,6 +7,7 @@ NETWORK_ID=localflare
 ROSETTA_IMAGE="${ROSETTA_IMAGE:-rosetta-local}"
 START_ROSETTA_SERVER_AFTER_BOOTSTRAP=${START_ROSETTA_SERVER_AFTER_BOOTSTRAP:-false}
 ROSETTA_PORT=8080
+CI="${CI:-false}"
 
 if ! command -v npx &> /dev/null; then
     log_error "npx command not found. Please install Node.js v20, yarn and npm first."
@@ -45,15 +46,16 @@ trap cleanup EXIT
 
 # Build Docker image
 log_header "Localflare 5-Node Deployment with Rosetta"
-echo ""
-#log_info "Building Docker image..."
-docker build \
-    --progress=plain \
-    --build-arg ROSETTA_SRC=. \
-    --build-arg ROSETTA_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
-    --tag ${ROSETTA_IMAGE} \
-    -f ./server/Dockerfile \
-    .
+
+if [ ! $CI ]; then
+  docker build \
+      --progress=plain \
+      --build-arg ROSETTA_SRC=. \
+      --build-arg ROSETTA_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
+      --tag ${ROSETTA_IMAGE} \
+      -f ./server/Dockerfile \
+      .
+fi
 
 ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP docker compose -f server/docker/docker-compose.yml up -d
 
