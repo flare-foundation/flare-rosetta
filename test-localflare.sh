@@ -140,6 +140,7 @@ else
     exit 1
 fi
 
+cd ..
 ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP docker compose -f server/docker/docker-compose.yml down
 
 echo ""
