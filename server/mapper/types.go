@@ -8,11 +8,11 @@ import (
 const (
 	FlareChainID = 14
 	FlareAssetID = "2MxKSeEWXViLdYyDhW1SQ46AECZEbE2bnVRZptv42JrxqyUX5k"
-	FlareHRP     = "flare"
+	FlareHRP     = "mainnet"
 
 	CostwoChainID = 114
 	CostwoAssetID = "fxMAKpBQQpFedrUhWMsDYfCUJxdUw4mneTczKBzNg3rc2JUub"
-	CostwoHRP     = "costwo"
+	CostwoHRP     = "testnet"
 
 	LocalFlareChainID = 162
 	LocalFlareAssetID = "QJx3BomP9MGxCy5RPVXyNUeEqzduvuNbxQVXMuPKDakacdY6K"
