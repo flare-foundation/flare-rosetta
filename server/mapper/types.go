@@ -118,6 +118,8 @@ var (
 		FlareHRP:      FlareChainID,
 		CostwoHRP:     CostwoChainID,
 		LocalFlareHRP: LocalFlareChainID,
+		"flare":       FlareChainID,  // Alias for network name
+		"costwo":      CostwoChainID, // Alias for network name
 		"fuji":        CostwoChainID, // Alias for backwards compatibility with tests
 	}
 )

@@ -21,7 +21,6 @@ import (
 	"github.com/ava-labs/avalanche-rosetta/service"
 	"github.com/ava-labs/avalanche-rosetta/service/backend/pchain/indexer"
 
-	avaconstants "github.com/ava-labs/avalanchego/utils/constants"
 	avatypes "github.com/ava-labs/avalanchego/vms/types"
 )
 
@@ -34,7 +33,8 @@ func TestFetchBlkDependencies(t *testing.T) {
 
 	ctx := context.Background()
 
-	networkID := avaconstants.MainnetID
+	// networkID := avaconstants.MainnetID
+	networkID := uint32(14) // Flare mainnet network ID
 	networkIdentifier := &types.NetworkIdentifier{
 		Blockchain: service.BlockchainName,
 		Network:    constants.MainnetNetwork,
