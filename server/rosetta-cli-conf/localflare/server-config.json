@@ -2,6 +2,6 @@
     "mode": "online",
     "rpc_base_url": "http://127.0.0.1:9650",
     "network_name": "localflare",
-    "genesis_block_hash": "0xc5d448ab94a1aafc9c18ad314ee306cb87d1f7030136d4eb072b145d772fd00c",
+    "genesis_block_hash": "0x95f311924a832165d415cff61bb87bc7d2761adf44cc0a47ff26d4762b8b32b1",
     "chain_id": 162
 }

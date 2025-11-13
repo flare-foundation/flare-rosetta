@@ -57,22 +57,6 @@ if [ "$MODE" = "online" ]; then
     done
 
     jq --arg c "${ROSETTA_FLARE_ENDPOINT}" '.rpc_base_url=$c' "${ROSETTA_CONFIG_PATH}" | sponge "${ROSETTA_CONFIG_PATH}"
-
-    # Fetch and update genesis block hash dynamically for localflare only
-    if [ "$NETWORK_ID" = "localflare" ]; then
-        echo "[rosetta-start-script] Fetching genesis block hash from RPC for localflare network..."
-        GENESIS_HASH=$(curl -s -X POST --data '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0",false],"id":1}' \
-            -H 'content-type:application/json;' \
-            "${ROSETTA_FLARE_ENDPOINT}/ext/bc/C/rpc" | jq -r '.result.hash')
-
-        if [ ! -z "$GENESIS_HASH" ] && [ "$GENESIS_HASH" != "null" ]; then
-            echo "[rosetta-start-script] Updating genesis_block_hash to: $GENESIS_HASH"
-            jq --arg g "${GENESIS_HASH}" '.genesis_block_hash=$g' "${ROSETTA_CONFIG_PATH}" | sponge "${ROSETTA_CONFIG_PATH}"
-        else
-            echo "[rosetta-start-script] WARNING: Could not fetch genesis block hash, using existing value"
-        fi
-    fi
-
 fi
 
 
