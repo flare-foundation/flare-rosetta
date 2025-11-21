@@ -35,8 +35,8 @@ func TestConfig(t *testing.T) {
 
 	t.Run("signer", func(t *testing.T) {
 		cfg := Config{
-			ChainID: params.FlareChainID,
+			ChainID: params.AvalancheMainnetChainID,
 		}
-		require.IsType(t, ethtypes.NewCancunSigner(params.FlareChainID), cfg.Signer())
+		require.IsType(t, ethtypes.NewCancunSigner(params.AvalancheMainnetChainID), cfg.Signer())
 	})
 }
