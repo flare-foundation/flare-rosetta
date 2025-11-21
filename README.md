@@ -175,3 +175,23 @@ docker run -d -p 8081:8080 -p 19650:9650 -p 19651:9651 -e NETWORK_ID=costwo -e M
 ```
 
 Modify cli config in `server/rosetta-cli-conf/config.json -> construction.offline_url` to point to the offline node.
+
+## Local full integration test
+
+You can use `test-localflare.sh` script. You need bash, node 20, npm, yarn, curl, jq and docker preinstalled.
+
+This script does the following:
+- spins up a 5 node localflare cluster
+- creates a few blocks
+- spins up a rosetta docker image, build from local source (as opposed to pulling from github)
+- installs rosetta-cli from github
+- performss a construction test
+- tears down the localflare network
+
+Run with:
+```
+export=ROSETTA_IMAGE=rosetta-local
+export=START_ROSETTA_SERVER_AFTER_BOOTSTRAP=true
+export=MODE=online
+./test-localflare.sh
+```
