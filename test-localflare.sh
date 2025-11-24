@@ -77,7 +77,7 @@ log_info "Bootstrapping P-chain using go-flare test scripts..."
 
 # Download the test scripts from go-flare repository
 rm -rf tmp && mkdir tmp
-git clone --depth=1 --branch=v1.11.13-rc0 https://github.com/flare-foundation/go-flare.git tmp/go-flare
+git clone --depth=1 --branch=v1.12.0 https://github.com/flare-foundation/go-flare.git tmp/go-flare
 npm install -g ts-node
 yarn --cwd "tmp/go-flare/test-scripts"
 yarn --cwd "tmp/go-flare/test-scripts" run p-chain-import

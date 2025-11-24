@@ -2,7 +2,9 @@ package pchain
 
 import (
 	"github.com/ava-labs/avalanchego/codec"
+	"github.com/ava-labs/avalanchego/genesis"
 	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/upgrade"
 	"github.com/ava-labs/avalanchego/vms/platformvm/block"
 	"github.com/coinbase/rosetta-sdk-go/types"
 
@@ -34,14 +36,15 @@ type Backend struct {
 	codecVersion       uint16
 	avaxAssetID        ids.ID
 	txParserCfg        pmapper.TxParserConfig
+	upgradeConfig      upgrade.Config
+	feeConfig          genesis.TxFeeConfig
 }
 
 // NewBackend creates a P-chain service backend
 func NewBackend(
-	nodeMode string,
 	pClient client.PChainClient,
 	indexerParser indexer.Parser,
-	assetID ids.ID,
+	avaxAssetID ids.ID,
 	networkIdentifier *types.NetworkIdentifier,
 	avalancheNetworkID uint32,
 ) (*Backend, error) {
@@ -50,34 +53,35 @@ func NewBackend(
 		return nil, err
 	}
 
-	b := &Backend{
+	networkHRP, err := mapper.GetHRP(networkIdentifier)
+	if err != nil {
+		return nil, err
+	}
+
+	upgradeConfig := upgrade.GetConfig(avalancheNetworkID)
+	feeConfig := genesis.GetTxFeeConfig(avalancheNetworkID)
+
+	return &Backend{
 		genesisHandler:     genHandler,
 		networkID:          networkIdentifier,
+		networkHRP:         networkHRP,
+		avalancheNetworkID: avalancheNetworkID,
 		pClient:            pClient,
+		indexerParser:      indexerParser,
 		getUTXOsPageSize:   1024,
 		codec:              block.Codec,
 		codecVersion:       block.CodecVersion,
-		indexerParser:      indexerParser,
-		avaxAssetID:        assetID,
-		avalancheNetworkID: avalancheNetworkID,
-	}
-
-	if nodeMode == service.ModeOnline {
-		var err error
-		if b.networkHRP, err = mapper.GetHRP(b.networkID); err != nil {
-			return nil, err
-		}
-	}
-
-	b.txParserCfg = pmapper.TxParserConfig{
-		IsConstruction: false,
-		Hrp:            b.networkHRP,
-		ChainIDs:       nil,
-		AvaxAssetID:    b.avaxAssetID,
-		PChainClient:   b.pClient,
-	}
-
-	return b, nil
+		avaxAssetID:        avaxAssetID,
+		txParserCfg: pmapper.TxParserConfig{
+			IsConstruction: false,
+			Hrp:            networkHRP,
+			ChainIDs:       nil,
+			AvaxAssetID:    avaxAssetID,
+			PChainClient:   pClient,
+		},
+		upgradeConfig: upgradeConfig,
+		feeConfig:     feeConfig,
+	}, nil
 }
 
 // ShouldHandleRequest returns whether a given request should be handled by this backend
