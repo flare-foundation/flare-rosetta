@@ -1,11 +1,11 @@
 # ------------------------------------------------------------------------------
 # Build go-flare
 # ------------------------------------------------------------------------------
-FROM golang:1.22 AS flare
+FROM golang:1.23 AS flare
 
 WORKDIR /app
 
-ARG GO_FLARE_VERSION=v1.12.0
+ARG GO_FLARE_VERSION=v1.13.0
 ARG GO_FLARE_REPO=https://github.com/flare-foundation/go-flare
 
 RUN git clone --branch "$GO_FLARE_VERSION" "${GO_FLARE_REPO}" .
@@ -18,7 +18,7 @@ RUN cd avalanchego && \
 # ------------------------------------------------------------------------------
 # Build flare-rosetta
 # ------------------------------------------------------------------------------
-FROM golang:1.22 AS rosetta
+FROM golang:1.23 AS rosetta
 
 ARG ROSETTA_BRANCH=main
 ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/${ROSETTA_BRANCH}.zip

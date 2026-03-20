@@ -40,15 +40,15 @@ log_header() {
 
 cleanup() {
     log_info "Cleaning up..."
-    #docker compose -f server/docker/docker-compose.yml down
+    ROSETTA_IMAGE=$ROSETTA_IMAGE START_ROSETTA_SERVER_AFTER_BOOTSTRAP=$START_ROSETTA_SERVER_AFTER_BOOTSTRAP MODE=$MODE docker compose -f server/docker/docker-compose.yml down
 }
 
-trap cleanup EXIT
+trap cleanup EXIT INT TERM
 
 # Build Docker image
 log_header "Localflare 5-Node Deployment with Rosetta"
 
-if [ ! $CI ]; then
+if [ "$CI" != "true" ]; then
   docker build \
       --progress=plain \
       --build-arg ROSETTA_SRC=. \
@@ -77,7 +77,7 @@ log_info "Bootstrapping P-chain using go-flare test scripts..."
 
 # Download the test scripts from go-flare repository
 rm -rf tmp && mkdir tmp
-git clone --depth=1 --branch=v1.12.0 https://github.com/flare-foundation/go-flare.git tmp/go-flare
+git clone --depth=1 --branch=v1.13.0 https://github.com/flare-foundation/go-flare.git tmp/go-flare
 npm install -g ts-node
 yarn --cwd "tmp/go-flare/test-scripts"
 yarn --cwd "tmp/go-flare/test-scripts" run p-chain-import

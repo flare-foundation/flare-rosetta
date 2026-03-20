@@ -1,6 +1,6 @@
 services:
   validator1:
-    image: ghcr.io/flare-foundation/go-flare:v1.12.0
+    image: ghcr.io/flare-foundation/go-flare:v1.13.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -20,7 +20,7 @@ services:
       test: curl localhost:9650/ext/health
 
   validator2:
-    image: ghcr.io/flare-foundation/go-flare:v1.12.0
+    image: ghcr.io/flare-foundation/go-flare:v1.13.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -37,7 +37,7 @@ services:
         ipv4_address: 10.20.30.2
 
   validator3:
-    image: ghcr.io/flare-foundation/go-flare:v1.12.0
+    image: ghcr.io/flare-foundation/go-flare:v1.13.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -55,7 +55,7 @@ services:
         ipv4_address: 10.20.30.3
 
   validator4:
-    image: ghcr.io/flare-foundation/go-flare:v1.12.0
+    image: ghcr.io/flare-foundation/go-flare:v1.13.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -72,7 +72,7 @@ services:
         ipv4_address: 10.20.30.4
 
   validator5:
-    image: ghcr.io/flare-foundation/go-flare:v1.12.0
+    image: ghcr.io/flare-foundation/go-flare:v1.13.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
