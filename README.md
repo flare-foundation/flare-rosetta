@@ -1,7 +1,7 @@
 # go-flare-rosetta
 
 ## System Requirements
-- go version 1.23
+- go version 1.24
 - gcc, g++ and jq
 - CPU: Equivalent of 8 AWS vCPU
 - RAM: 16 GiB
