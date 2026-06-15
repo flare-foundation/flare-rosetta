@@ -26,7 +26,6 @@ import (
 	"github.com/ava-labs/avalanche-rosetta/service/backend/pchain/indexer"
 
 	pmapper "github.com/ava-labs/avalanche-rosetta/mapper/pchain"
-	avaconstants "github.com/ava-labs/avalanchego/utils/constants"
 )
 
 var (
@@ -51,7 +50,9 @@ var (
 
 	nodeID = "NodeID-Bvsx89JttQqhqdgwtizAPoVSNW74Xcr2S"
 
-	avalancheNetworkID = avaconstants.FujiID
+	// Network ID 5 was Fuji upstream (the go-flare fork reassigns it to Songbird);
+	// the serialized tx fixtures and bech32 addresses in this file embed it.
+	avalancheNetworkID = uint32(5)
 
 	avaxAssetID, _ = ids.FromString("U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK")
 
@@ -594,6 +595,8 @@ func TestAddValidatorTxConstruction(t *testing.T) {
 				"delegation_rewards_owner": []string{ewoqAccountP.Address},
 				"validator_rewards_owner":  []string{ewoqAccountP.Address},
 				"signer":                   pop,
+				"validator_weight":         uint64(2_000_000_000_000),
+				"delegation_fee":           shares,
 			},
 		},
 	}
@@ -839,6 +842,7 @@ func TestAddDelegatorTxConstruction(t *testing.T) {
 				"validator_node_id":       nodeID,
 				"subnet_id":               pChainID.String(),
 				"delegator_rewards_owner": []string{ewoqAccountP.Address},
+				"validator_weight":        uint64(25_000_000_000),
 			},
 		},
 	}

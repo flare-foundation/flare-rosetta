@@ -11,7 +11,7 @@ DOCKER_ORG          ?= avaplatform
 DOCKER_IMAGE        ?= ${DOCKER_ORG}/${PROJECT}
 DOCKER_LABEL        ?= latest
 DOCKER_TAG          ?= ${DOCKER_IMAGE}:${DOCKER_LABEL}
-AVALANCHE_VERSION   ?= v1.11.9
+AVALANCHE_VERSION   ?= v1.14.0
 
 build:
 	go build -o ./rosetta-server ./cmd/server
@@ -26,18 +26,18 @@ test:
 docker-build:
 	docker build \
 		--build-arg AVALANCHE_VERSION=${AVALANCHE_VERSION} \
-		--build-arg ROSETTA_VERSION=${GIT_COMMIT} \
+		--build-arg ROS_COMMIT=${GIT_COMMIT} \
 		-t ${DOCKER_TAG} \
 		-f Dockerfile \
 		.
 
 docker-build-arm64:
 	docker build \
-    		--build-arg AVALANCHE_VERSION=${AVALANCHE_VERSION} \
-    		--build-arg ROSETTA_VERSION=${GIT_COMMIT} \
-    		-t ${DOCKER_TAG} \
-    		-f Dockerfile.arm64 \
-    		.
+		--build-arg AVALANCHE_VERSION=${AVALANCHE_VERSION} \
+		--build-arg ROS_COMMIT=${GIT_COMMIT} \
+		-t ${DOCKER_TAG} \
+		-f Dockerfile.arm64 \
+		.
 
 # Start the Testnet in ONLINE mode
 run-testnet:

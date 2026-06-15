@@ -13,9 +13,11 @@ import (
 	"github.com/ava-labs/avalanche-rosetta/client"
 	"github.com/ava-labs/avalanche-rosetta/constants"
 	"github.com/ava-labs/avalanche-rosetta/mapper"
-
-	avaconstants "github.com/ava-labs/avalanchego/utils/constants"
 )
+
+// HRP of the upstream Fuji network; the test fixtures in test_data.go encode
+// addresses with this prefix. Not available from the go-flare avalanchego fork.
+const fujiHRP = "fuji"
 
 var (
 	avaxAssetID, _ = ids.FromString("U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK")
@@ -38,7 +40,7 @@ func TestMapInOperation(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: false,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -90,7 +92,7 @@ func TestMapNonAvaxTransactionInConstruction(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 
 		// passing empty as AVAX id, so that
@@ -119,7 +121,7 @@ func TestMapOutOperation(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -157,7 +159,7 @@ func TestMapAddValidatorTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -176,6 +178,11 @@ func TestMapAddValidatorTx(t *testing.T) {
 	require.Equal(2, cntInputMeta)
 	require.Zero(cntOutputMeta)
 	require.Equal(1, cntMetaType)
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(OpTypeStakeOutput, stakeOutOp.Metadata["type"])
+	require.Equal(uint64(2000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
+	require.Equal(uint32(20000), stakeOutOp.Metadata[MetadataDelegationFee])
 }
 
 func TestMapAddPermissionlessValidatorTx(t *testing.T) {
@@ -190,7 +197,7 @@ func TestMapAddPermissionlessValidatorTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -209,6 +216,11 @@ func TestMapAddPermissionlessValidatorTx(t *testing.T) {
 	require.Equal(2, cntInputMeta)
 	require.Zero(cntOutputMeta)
 	require.Equal(1, cntMetaType)
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(OpTypeStakeOutput, stakeOutOp.Metadata["type"])
+	require.Equal(uint64(2000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
+	require.Equal(uint32(20000), stakeOutOp.Metadata[MetadataDelegationFee])
 }
 
 // TODO: Remove Post-Durango
@@ -225,7 +237,7 @@ func TestMapAddDelegatorTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -262,6 +274,9 @@ func TestMapAddDelegatorTx(t *testing.T) {
 	require.Equal(OpTypeInput, rosettaTransaction.Operations[0].Metadata["type"])
 	require.Equal(OpTypeOutput, rosettaTransaction.Operations[1].Metadata["type"])
 	require.Equal(OpTypeStakeOutput, rosettaTransaction.Operations[2].Metadata["type"])
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(uint64(1000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
 }
 
 func TestMapAddPermissionlessDelegatorTx(t *testing.T) {
@@ -277,7 +292,7 @@ func TestMapAddPermissionlessDelegatorTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -314,6 +329,9 @@ func TestMapAddPermissionlessDelegatorTx(t *testing.T) {
 	require.Equal(OpTypeInput, rosettaTransaction.Operations[0].Metadata["type"])
 	require.Equal(OpTypeOutput, rosettaTransaction.Operations[1].Metadata["type"])
 	require.Equal(OpTypeStakeOutput, rosettaTransaction.Operations[2].Metadata["type"])
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(uint64(1000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
 }
 
 func TestMapImportTx(t *testing.T) {
@@ -328,7 +346,7 @@ func TestMapImportTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -365,7 +383,7 @@ func TestMapNonConstructionImportTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: false,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -423,7 +441,7 @@ func TestMapExportTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -457,7 +475,7 @@ func TestMapNonConstructionExportTx(t *testing.T) {
 	pchainClient := client.NewMockPChainClient(ctrl)
 	parserCfg := TxParserConfig{
 		IsConstruction: false,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
@@ -488,7 +506,7 @@ func TestMapNonConstructionExportTx(t *testing.T) {
 	// setting isConstruction to true in order to include exported output in the operations
 	parserCfg = TxParserConfig{
 		IsConstruction: true,
-		Hrp:            avaconstants.FujiHRP,
+		Hrp:            fujiHRP,
 		ChainIDs:       chainIDs,
 		AvaxAssetID:    avaxAssetID,
 		PChainClient:   pchainClient,
