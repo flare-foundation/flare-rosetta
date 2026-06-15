@@ -18,9 +18,9 @@ require (
 	connectrpc.com/grpcreflect v1.3.0 // indirect
 	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/StephenButtolph/canoto v0.17.3 // indirect
+	github.com/StephenButtolph/canoto v0.17.2 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.1 // indirect
-	github.com/ava-labs/firewood-go-ethhash/ffi v0.0.15 // indirect
+	github.com/ava-labs/firewood-go-ethhash/ffi v0.0.13 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.20.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.5 // indirect

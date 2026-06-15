@@ -126,18 +126,18 @@ func TestGenesisBlockParseTxs(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	pchainClient := client.NewMockPChainClient(ctrl)
 
-	p, err := NewParser(pchainClient, avaconstants.CostwoID)
+	p, err := NewParser(pchainClient, avaconstants.FujiID)
 	require.NoError(err)
 
 	ctx := context.Background()
 	g, err := p.GetGenesisBlock(ctx)
 	require.NoError(err)
 
-	initializeTxCtx(g.Txs, avaconstants.CostwoID)
+	initializeTxCtx(g.Txs, avaconstants.FujiID)
 	j, err := json.MarshalIndent(g, "", "  ")
 	require.NoError(err)
 
-	ret := readFixture("outs/genesis_costwo_txs.json")
+	ret := readFixture("outs/genesis_fuji_txs.json")
 	require.JSONEq(string(ret), string(j))
 }
 

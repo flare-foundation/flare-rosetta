@@ -26,6 +26,7 @@ import (
 	"github.com/ava-labs/avalanche-rosetta/service/backend/pchain/indexer"
 
 	pmapper "github.com/ava-labs/avalanche-rosetta/mapper/pchain"
+	avaconstants "github.com/ava-labs/avalanchego/utils/constants"
 )
 
 var (
@@ -50,9 +51,7 @@ var (
 
 	nodeID = "NodeID-Bvsx89JttQqhqdgwtizAPoVSNW74Xcr2S"
 
-	// Network ID 5 was Fuji upstream (the go-flare fork reassigns it to Songbird);
-	// the serialized tx fixtures and bech32 addresses in this file embed it.
-	avalancheNetworkID = uint32(5)
+	avalancheNetworkID = avaconstants.FujiID
 
 	avaxAssetID, _ = ids.FromString("U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK")
 

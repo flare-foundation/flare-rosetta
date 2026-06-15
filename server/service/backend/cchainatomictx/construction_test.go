@@ -19,6 +19,7 @@ import (
 	"github.com/ava-labs/avalanche-rosetta/service"
 	"github.com/ava-labs/avalanche-rosetta/service/backend/common"
 
+	avaconstants "github.com/ava-labs/avalanchego/utils/constants"
 	ethcommon "github.com/ava-labs/libevm/common"
 )
 
@@ -35,9 +36,7 @@ var (
 	cChainID, _ = ids.FromString("yH8D7ThNJkxmtkuv2jgBa4P1Rn3Qpr4pPr7QYNfcdoS6k6HWp")
 	pChainID    = ids.Empty
 
-	// Network ID 5 was Fuji upstream (the go-flare fork reassigns it to Songbird);
-	// the serialized tx fixtures and bech32 addresses in this file embed it.
-	avalancheNetworkID = uint32(5)
+	avalancheNetworkID = avaconstants.FujiID
 
 	avaxAssetID, _ = ids.FromString("U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK")
 )
