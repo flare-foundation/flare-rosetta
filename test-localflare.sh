@@ -72,6 +72,15 @@ done
 
 log_info "Localflare cluster is healthy"
 
+VALIDATOR_COUNT=$(curl -m 10 -s -X POST --data '{"jsonrpc":"2.0","method":"platform.getCurrentValidators","params":{},"id":1}' -H 'content-type:application/json;' http://localhost:9650/ext/bc/P | jq '.result.validators | length')
+
+if [ "${VALIDATOR_COUNT:-0}" -ge 1 ]; then
+    log_info "Got $VALIDATOR_COUNT active validator(s)"
+else
+    log_error "No active validators found ($VALIDATOR_COUNT), check your genesis."
+    exit 1
+fi
+
 # Bootstrap P-chain using go-flare test scripts
 log_info "Bootstrapping P-chain using go-flare test scripts..."
 
@@ -82,6 +91,11 @@ npm install -g ts-node
 yarn --cwd "tmp/go-flare/test-scripts"
 yarn --cwd "tmp/go-flare/test-scripts" run p-chain-import
 yarn --cwd "tmp/go-flare/test-scripts" run p-chain-export
+
+# Send a C-chain self-transfer to ensure at least one EVM block is produced.
+# rosetta-cli rejects /network/status if current block timestamp is 0 (genesis).
+cp server/scripts/test-c-chain-warmup.ts tmp/go-flare/test-scripts/src/
+(cd tmp/go-flare/test-scripts && yarn exec ts-node src/test-c-chain-warmup.ts)
 
 while [[ "$(curl -X POST --data '{ "jsonrpc": "2.0", "method": "platform.getHeight", "params": {}, "id": 1 }' -H 'content-type:application/json;' 127.0.0.1:9650/ext/bc/P | jq -r .result.height)" -lt "2" ]]
 do
@@ -97,6 +111,20 @@ do
 done
 
 log_info "✓ Rosetta is ready!"
+
+log_info "Waiting for rosetta C-chain to advance past genesis..."
+while true; do
+  BLOCK=$(curl -s -X POST \
+    --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+    -H 'content-type:application/json;' \
+    127.0.0.1:9650/ext/bc/C/rpc 2>/dev/null | jq -r '.result // "0x0"')
+  if [[ "$BLOCK" != "0x0" && "$BLOCK" != "null" && -n "$BLOCK" ]]; then
+    log_info "C-chain at block $BLOCK"
+    break
+  fi
+  echo "Waiting for C-chain block (current: ${BLOCK:-0x0})..."
+  sleep 3
+done
 
 # Test network list endpoint
 log_info "Testing /network/list endpoint..."

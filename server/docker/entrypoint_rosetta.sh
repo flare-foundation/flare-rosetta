@@ -47,7 +47,7 @@ if [ "$MODE" = "online" ]; then
             echo "[rosetta-start-script] Got status '$STATUS' on network id '$NETWORK_ID', checking if because of no peers"
             is_because_of_no_peers=$(curl -s ${ROSETTA_FLARE_ENDPOINT}/ext/health | grep "network layer is unhealthy reason: not connected to a minimum of 1 peer")
 
-            if [ ! -z is_because_of_no_peers ]; then
+            if [ ! -z "$is_because_of_no_peers" ]; then
                 echo "[rosetta-start-script] it is because there are no peers. This is okay on localflare. OK!"
                 break
             fi
