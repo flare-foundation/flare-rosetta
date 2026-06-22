@@ -176,6 +176,11 @@ func TestMapAddValidatorTx(t *testing.T) {
 	require.Equal(2, cntInputMeta)
 	require.Zero(cntOutputMeta)
 	require.Equal(1, cntMetaType)
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(OpTypeStakeOutput, stakeOutOp.Metadata["type"])
+	require.Equal(uint64(2000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
+	require.Equal(uint32(20000), stakeOutOp.Metadata[MetadataDelegationFee])
 }
 
 func TestMapAddPermissionlessValidatorTx(t *testing.T) {
@@ -209,6 +214,11 @@ func TestMapAddPermissionlessValidatorTx(t *testing.T) {
 	require.Equal(2, cntInputMeta)
 	require.Zero(cntOutputMeta)
 	require.Equal(1, cntMetaType)
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(OpTypeStakeOutput, stakeOutOp.Metadata["type"])
+	require.Equal(uint64(2000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
+	require.Equal(uint32(20000), stakeOutOp.Metadata[MetadataDelegationFee])
 }
 
 // TODO: Remove Post-Durango
@@ -262,6 +272,9 @@ func TestMapAddDelegatorTx(t *testing.T) {
 	require.Equal(OpTypeInput, rosettaTransaction.Operations[0].Metadata["type"])
 	require.Equal(OpTypeOutput, rosettaTransaction.Operations[1].Metadata["type"])
 	require.Equal(OpTypeStakeOutput, rosettaTransaction.Operations[2].Metadata["type"])
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(uint64(1000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
 }
 
 func TestMapAddPermissionlessDelegatorTx(t *testing.T) {
@@ -314,6 +327,9 @@ func TestMapAddPermissionlessDelegatorTx(t *testing.T) {
 	require.Equal(OpTypeInput, rosettaTransaction.Operations[0].Metadata["type"])
 	require.Equal(OpTypeOutput, rosettaTransaction.Operations[1].Metadata["type"])
 	require.Equal(OpTypeStakeOutput, rosettaTransaction.Operations[2].Metadata["type"])
+
+	stakeOutOp := rosettaTransaction.Operations[2]
+	require.Equal(uint64(1000000000), stakeOutOp.Metadata[MetadataValidatorWeight])
 }
 
 func TestMapImportTx(t *testing.T) {

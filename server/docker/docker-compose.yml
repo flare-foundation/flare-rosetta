@@ -1,18 +1,19 @@
 services:
   validator1:
-    image: ghcr.io/flare-foundation/go-flare:v1.13.0
+    image: ghcr.io/flare-foundation/go-flare:v1.14.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
       AUTOCONFIGURE_PUBLIC_IP: 0
       AUTOCONFIGURE_BOOTSTRAP: 0
       PUBLIC_IP: 10.20.30.1
-      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker1.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker1.key --staking-signer-key-file=/app/avalanchego/staking/local/signer1.key
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker1.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker1.key --staking-signer-key-file=/app/avalanchego/staking/local/signer1.key --chain-config-dir=/app/avalanchego/
     ports:
       - 9650:9650
       - 9651:9651
     volumes:
       - ./localflare:/app/avalanchego/staking/local:ro
+      - ./localflare/C:/app/avalanchego/C:ro
     networks:
       nodes:
         ipv4_address: 10.20.30.1
@@ -20,7 +21,7 @@ services:
       test: curl localhost:9650/ext/health
 
   validator2:
-    image: ghcr.io/flare-foundation/go-flare:v1.13.0
+    image: ghcr.io/flare-foundation/go-flare:v1.14.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -29,15 +30,18 @@ services:
       PUBLIC_IP: 10.20.30.2
       BOOTSTRAP_IPS: 10.20.30.1:9651
       BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
-      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker2.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker2.key --staking-signer-key-file=/app/avalanchego/staking/local/signer2.key
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker2.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker2.key --staking-signer-key-file=/app/avalanchego/staking/local/signer2.key --chain-config-dir=/app/avalanchego/
     volumes:
       - ./localflare:/app/avalanchego/staking/local:ro
+      - ./localflare/C:/app/avalanchego/C:ro
     networks:
       nodes:
         ipv4_address: 10.20.30.2
+    depends_on:
+      - validator1
 
   validator3:
-    image: ghcr.io/flare-foundation/go-flare:v1.13.0
+    image: ghcr.io/flare-foundation/go-flare:v1.14.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -47,15 +51,18 @@ services:
       PUBLIC_IP: 10.20.30.3
       BOOTSTRAP_IPS: 10.20.30.1:9651
       BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
-      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker3.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker3.key --staking-signer-key-file=/app/avalanchego/staking/local/signer3.key
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker3.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker3.key --staking-signer-key-file=/app/avalanchego/staking/local/signer3.key --chain-config-dir=/app/avalanchego/
     volumes:
       - ./localflare:/app/avalanchego/staking/local:ro
+      - ./localflare/C:/app/avalanchego/C:ro
     networks:
       nodes:
         ipv4_address: 10.20.30.3
+    depends_on:
+      - validator1
 
   validator4:
-    image: ghcr.io/flare-foundation/go-flare:v1.13.0
+    image: ghcr.io/flare-foundation/go-flare:v1.14.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -64,15 +71,18 @@ services:
       PUBLIC_IP: 10.20.30.4
       BOOTSTRAP_IPS: 10.20.30.1:9651
       BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
-      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker4.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker4.key --staking-signer-key-file=/app/avalanchego/staking/local/signer4.key
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker4.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker4.key --staking-signer-key-file=/app/avalanchego/staking/local/signer4.key --chain-config-dir=/app/avalanchego/
     volumes:
       - ./localflare:/app/avalanchego/staking/local:ro
+      - ./localflare/C:/app/avalanchego/C:ro
     networks:
       nodes:
         ipv4_address: 10.20.30.4
+    depends_on:
+      - validator1
 
   validator5:
-    image: ghcr.io/flare-foundation/go-flare:v1.13.0
+    image: ghcr.io/flare-foundation/go-flare:v1.14.0
     environment:
       LOG_LEVEL: info
       NETWORK_ID: localflare
@@ -81,12 +91,15 @@ services:
       PUBLIC_IP: 10.20.30.5
       BOOTSTRAP_IPS: 10.20.30.1:9651
       BOOTSTRAP_IDS: NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
-      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker5.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker5.key --staking-signer-key-file=/app/avalanchego/staking/local/signer5.key
+      EXTRA_ARGUMENTS: --staking-tls-cert-file=/app/avalanchego/staking/local/staker5.crt --staking-tls-key-file=/app/avalanchego/staking/local/staker5.key --staking-signer-key-file=/app/avalanchego/staking/local/signer5.key --chain-config-dir=/app/avalanchego/
     volumes:
       - ./localflare:/app/avalanchego/staking/local:ro
+      - ./localflare/C:/app/avalanchego/C:ro
     networks:
       nodes:
         ipv4_address: 10.20.30.5
+    depends_on:
+      - validator1
 
   rosetta:
     image: ${ROSETTA_IMAGE}

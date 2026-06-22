@@ -594,6 +594,8 @@ func TestAddValidatorTxConstruction(t *testing.T) {
 				"delegation_rewards_owner": []string{ewoqAccountP.Address},
 				"validator_rewards_owner":  []string{ewoqAccountP.Address},
 				"signer":                   pop,
+				"validator_weight":         uint64(2_000_000_000_000),
+				"delegation_fee":           shares,
 			},
 		},
 	}
@@ -839,6 +841,7 @@ func TestAddDelegatorTxConstruction(t *testing.T) {
 				"validator_node_id":       nodeID,
 				"subnet_id":               pChainID.String(),
 				"delegator_rewards_owner": []string{ewoqAccountP.Address},
+				"validator_weight":        uint64(25_000_000_000),
 			},
 		},
 	}

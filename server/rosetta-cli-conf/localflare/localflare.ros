@@ -47,13 +47,16 @@ transfer(10){
     currency = {"symbol":"FLR", "decimals":18};
     sender = find_balance({
       "minimum_balance":{
-        "value": "10000000000000000", // 0.01 FLR
+        "value": "250000000000000000", // 0.25 FLR (must exceed max_fee)
         "currency": {{currency}}
       }
     });
 
     // Set the recipient_amount as some value <= sender.balance-max_fee
-    max_fee = "4725000000000000"; // 0.004725 FLR
+    // With go-flare 1.14 (Granite upgrade), ACP-176 MinGasPrice = 500 Gwei
+    // suggested_fee_multiplier = 10 -> effective gas price ~5000 Gwei
+    // max_fee = 10000 Gwei * 21000 gas = 210e15 Wei (2x safety margin over 5000 Gwei)
+    max_fee = "210000000000000000"; // 0.21 FLR
     available_amount = {{sender.balance.value}} - {{max_fee}};
     recipient_amount = random_number({"minimum": "1", "maximum": {{available_amount}}});
     print_message({"recipient_amount":{{recipient_amount}}});
@@ -69,6 +72,7 @@ transfer(10){
       "create_limit": 2,
       "create_probability": 100
     });
+    transfer.suggested_fee_multiplier = 10;
     transfer.confirmation_depth = "1";
     transfer.operations = [
       {
