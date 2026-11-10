@@ -9,10 +9,10 @@ import (
 	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
 	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm/platform"
 	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
 	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
 	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 	"github.com/stretchr/testify/require"
 )
@@ -62,8 +62,8 @@ func TestTxDependencyIsCreateChain(t *testing.T) {
 	}
 
 	// create a non-reward validator tx
-	utx := &txs.CreateChainTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+	utx := &platform.CreateChainTx{
+		BaseTx: platform.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    10,
 			BlockchainID: ids.ID{'c', 'h', 'a', 'i', 'n', 'I', 'D'},
 			Ins:          []*avax.TransferableInput{in},
@@ -77,7 +77,7 @@ func TestTxDependencyIsCreateChain(t *testing.T) {
 		GenesisData: []byte{'g', 'e', 'n', 'D', 'a', 't', 'a'},
 		SubnetAuth:  &secp256k1fx.Input{SigIndices: []uint32{1}},
 	}
-	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	tx, err := platform.NewSignedTx(utx, platform.Codec, nil)
 	require.NoError(err)
 
 	dep := &SingleTxDependency{Tx: tx}
@@ -112,6 +112,175 @@ func TestTxDependencyIsCreateChain(t *testing.T) {
 	require.Equal(utxo, expectedUTXOs[1])
 
 	// show idempotency
+	res2 := dep.GetUtxos()
+	require.Equal(res, res2)
+}
+
+func TestTxDependencyIsAddAutoRenewedValidator(t *testing.T) {
+	require := require.New(t)
+
+	avaxAssetID := ids.GenerateTestID()
+	nodeID := ids.GenerateTestNodeID()
+
+	in := &avax.TransferableInput{
+		UTXOID: avax.UTXOID{
+			TxID:        ids.ID{'t', 'x', 'I', 'D'},
+			OutputIndex: 0,
+		},
+		Asset: avax.Asset{ID: avaxAssetID},
+		In: &secp256k1fx.TransferInput{
+			Amt:   uint64(3000000000),
+			Input: secp256k1fx.Input{SigIndices: []uint32{0}},
+		},
+	}
+	out := &avax.TransferableOutput{
+		Asset: avax.Asset{ID: avaxAssetID},
+		Out: &secp256k1fx.TransferOutput{
+			Amt: uint64(1000000000),
+			OutputOwners: secp256k1fx.OutputOwners{
+				Threshold: 1,
+				Addrs:     []ids.ShortID{preFundedKeys[0].PublicKey().Address()},
+			},
+		},
+	}
+	stake := &avax.TransferableOutput{
+		Asset: avax.Asset{ID: avaxAssetID},
+		Out: &secp256k1fx.TransferOutput{
+			Amt: uint64(2000000000),
+			OutputOwners: secp256k1fx.OutputOwners{
+				Threshold: 1,
+				Addrs:     []ids.ShortID{preFundedKeys[1].PublicKey().Address()},
+			},
+		},
+	}
+	rewardsOwner := &secp256k1fx.OutputOwners{
+		Threshold: 1,
+		Addrs:     []ids.ShortID{preFundedKeys[0].PublicKey().Address()},
+	}
+	utx := &platform.AddAutoRenewedValidatorTx{
+		BaseTx: platform.BaseTx{BaseTx: avax.BaseTx{
+			NetworkID:    uint32(1492),
+			BlockchainID: ids.GenerateTestID(),
+			Ins:          []*avax.TransferableInput{in},
+			Outs:         []*avax.TransferableOutput{out},
+		}},
+		ValidatorNodeID:          nodeID[:],
+		Signer:                   &signer.Empty{},
+		StakeOuts:                []*avax.TransferableOutput{stake},
+		ValidatorRewardsOwner:    rewardsOwner,
+		DelegatorRewardsOwner:    rewardsOwner,
+		ValidatorAuthority:       rewardsOwner,
+		DelegationShares:         20000,
+		AutoCompoundRewardShares: 300000,
+		Period:                   14 * 24 * 3600,
+	}
+	tx, err := platform.NewSignedTx(utx, platform.Codec, nil)
+	require.NoError(err)
+
+	dep := &SingleTxDependency{Tx: tx}
+	res := dep.GetUtxos()
+	require.Len(res, 2)
+
+	outUTXO := &avax.UTXO{
+		UTXOID: avax.UTXOID{TxID: tx.ID(), OutputIndex: 0},
+		Asset:  out.Asset,
+		Out:    out.Out,
+	}
+	stakeUTXO := &avax.UTXO{
+		UTXOID: avax.UTXOID{TxID: tx.ID(), OutputIndex: 1},
+		Asset:  stake.Asset,
+		Out:    stake.Out,
+	}
+
+	found, ok := res[outUTXO.UTXOID]
+	require.True(ok)
+	require.Equal(outUTXO, found)
+
+	found, ok = res[stakeUTXO.UTXOID]
+	require.True(ok)
+	require.Equal(stakeUTXO, found)
+
+	res2 := dep.GetUtxos()
+	require.Equal(res, res2)
+}
+
+func TestTxDependencyIsSetAutoRenewedValidatorConfig(t *testing.T) {
+	require := require.New(t)
+
+	avaxAssetID := ids.GenerateTestID()
+	stakingTxID := ids.GenerateTestID()
+
+	in := &avax.TransferableInput{
+		UTXOID: avax.UTXOID{
+			TxID:        ids.ID{'t', 'x', 'I', 'D'},
+			OutputIndex: 0,
+		},
+		Asset: avax.Asset{ID: avaxAssetID},
+		In: &secp256k1fx.TransferInput{
+			Amt:   uint64(1000000),
+			Input: secp256k1fx.Input{SigIndices: []uint32{0}},
+		},
+	}
+	out := &avax.TransferableOutput{
+		Asset: avax.Asset{ID: avaxAssetID},
+		Out: &secp256k1fx.TransferOutput{
+			Amt: uint64(900000),
+			OutputOwners: secp256k1fx.OutputOwners{
+				Threshold: 1,
+				Addrs:     []ids.ShortID{preFundedKeys[0].PublicKey().Address()},
+			},
+		},
+	}
+	utx := &platform.SetAutoRenewedValidatorConfigTx{
+		BaseTx: platform.BaseTx{BaseTx: avax.BaseTx{
+			NetworkID:    uint32(1492),
+			BlockchainID: ids.GenerateTestID(),
+			Ins:          []*avax.TransferableInput{in},
+			Outs:         []*avax.TransferableOutput{out},
+		}},
+		TxID:                     stakingTxID,
+		Auth:                     &secp256k1fx.Input{SigIndices: []uint32{0}},
+		AutoCompoundRewardShares: 500000,
+		Period:                   7 * 24 * 3600,
+	}
+	tx, err := platform.NewSignedTx(utx, platform.Codec, nil)
+	require.NoError(err)
+
+	dep := &SingleTxDependency{Tx: tx}
+	res := dep.GetUtxos()
+	require.Len(res, 1)
+
+	expectedUTXO := &avax.UTXO{
+		UTXOID: avax.UTXOID{TxID: tx.ID(), OutputIndex: 0},
+		Asset:  out.Asset,
+		Out:    out.Out,
+	}
+
+	utxo, ok := res[expectedUTXO.UTXOID]
+	require.True(ok)
+	require.Equal(expectedUTXO, utxo)
+
+	res2 := dep.GetUtxos()
+	require.Equal(res, res2)
+}
+
+func TestTxDependencyIsRewardAutoRenewedValidator(t *testing.T) {
+	require := require.New(t)
+
+	stakingTxID := ids.GenerateTestID()
+
+	utx := &platform.RewardAutoRenewedValidatorTx{
+		TxID:      stakingTxID,
+		Timestamp: 1,
+	}
+	tx, err := platform.NewSignedTx(utx, platform.Codec, nil)
+	require.NoError(err)
+
+	dep := &SingleTxDependency{Tx: tx}
+	res := dep.GetUtxos()
+	// RewardAutoRenewedValidatorTx has no outputs; rewards are tracked separately via RewardUTXOs
+	require.Empty(res)
+
 	res2 := dep.GetUtxos()
 	require.Equal(res, res2)
 }
@@ -160,14 +329,14 @@ func TestTxDependencyIsAddValidator(t *testing.T) {
 			},
 		},
 	}
-	utx := &txs.AddValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+	utx := &platform.AddValidatorTx{
+		BaseTx: platform.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    uint32(1492),
 			BlockchainID: ids.GenerateTestID(),
 			Ins:          []*avax.TransferableInput{in},
 			Outs:         []*avax.TransferableOutput{out},
 		}},
-		Validator: txs.Validator{
+		Validator: platform.Validator{
 			NodeID: ids.GenerateTestNodeID(),
 			Start:  uint64(clk.Time().Unix()),
 			End:    uint64(clk.Time().Add(time.Hour).Unix()),
@@ -181,7 +350,7 @@ func TestTxDependencyIsAddValidator(t *testing.T) {
 		},
 		DelegationShares: reward.PercentDenominator,
 	}
-	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	tx, err := platform.NewSignedTx(utx, platform.Codec, nil)
 	require.NoError(err)
 
 	dep := &SingleTxDependency{Tx: tx}
@@ -219,7 +388,6 @@ func TestTxDependencyIsAddValidator(t *testing.T) {
 	res2 := dep.GetUtxos()
 	require.Equal(res, res2)
 }
-
 func TestTxDependencyIsAddPermissionlessValidator(t *testing.T) {
 	require := require.New(t)
 
@@ -263,14 +431,14 @@ func TestTxDependencyIsAddPermissionlessValidator(t *testing.T) {
 			},
 		},
 	}
-	utx := &txs.AddPermissionlessValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+	utx := &platform.AddPermissionlessValidatorTx{
+		BaseTx: platform.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    uint32(1492),
 			BlockchainID: ids.GenerateTestID(),
 			Ins:          []*avax.TransferableInput{in},
 			Outs:         []*avax.TransferableOutput{out},
 		}},
-		Validator: txs.Validator{
+		Validator: platform.Validator{
 			NodeID: ids.GenerateTestNodeID(),
 			Start:  uint64(clk.Time().Unix()),
 			End:    uint64(clk.Time().Add(time.Hour).Unix()),
@@ -291,7 +459,7 @@ func TestTxDependencyIsAddPermissionlessValidator(t *testing.T) {
 		},
 		DelegationShares: reward.PercentDenominator,
 	}
-	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	tx, err := platform.NewSignedTx(utx, platform.Codec, nil)
 	require.NoError(err)
 
 	dep := &SingleTxDependency{Tx: tx}

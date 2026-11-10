@@ -11,14 +11,13 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow"
 	"github.com/ava-labs/avalanchego/utils/hashing"
-	"github.com/ava-labs/avalanchego/vms/platformvm/block"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 
 	"github.com/ava-labs/avalanche-rosetta/client"
 	"github.com/ava-labs/avalanche-rosetta/constants"
 
 	avaconstants "github.com/ava-labs/avalanchego/utils/constants"
 	platformvmgenesis "github.com/ava-labs/avalanchego/vms/platformvm/genesis"
+	"github.com/ava-labs/avalanchego/vms/platformvm/platform"
 	proposervmblock "github.com/ava-labs/avalanchego/vms/proposervm/block"
 )
 
@@ -72,8 +71,8 @@ func NewParser(pChainClient client.PChainClient, avalancheNetworkID uint32) (Par
 
 	return &parser{
 		pChainClient: pChainClient,
-		codec:        block.Codec,
-		codecVersion: block.CodecVersion,
+		codec:        platform.Codec,
+		codecVersion: platform.CodecVersion,
 		networkID:    avalancheNetworkID,
 		aliaser:      aliaser,
 	}, nil
@@ -107,14 +106,14 @@ func (p *parser) GetGenesisBlock(_ context.Context) (*ParsedGenesisBlock, error)
 
 	genesisTimestamp := time.Unix(int64(genesisState.Timestamp), 0)
 
-	var genesisTxs []*txs.Tx
+	var genesisTxs []*platform.Tx
 	genesisTxs = append(genesisTxs, genesisState.Validators...)
 	genesisTxs = append(genesisTxs, genesisState.Chains...)
 
 	// Build genesis ID and ParentID as it's done in platformVM'State,
 	// without polling indexer (for backward compatibility).
 	genesisParentID := hashing.ComputeHash256Array(bytes)
-	genesisBlock, err := block.NewApricotCommitBlock(genesisParentID, 0)
+	genesisBlock, err := platform.NewApricotCommitBlock(genesisParentID, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -217,13 +216,13 @@ func (p *parser) parseProposerBlock(blkBytes []byte) (*ParsedBlock, error) {
 }
 
 func (p *parser) parsePChainBlock(pChainBlkBytes []byte, proposerTime time.Time) (*ParsedBlock, error) {
-	blk, err := block.Parse(p.codec, pChainBlkBytes)
+	blk, err := platform.ParseBlock(p.codec, pChainBlkBytes)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshaling block bytes errored with %w", err)
 	}
 	txes := blk.Txs()
 	if txes == nil {
-		txes = []*txs.Tx{}
+		txes = []*platform.Tx{}
 	}
 
 	// We retrieve timestamps from the block to have a deployment-independent timestamp.
@@ -245,29 +244,29 @@ func (p *parser) parsePChainBlock(pChainBlkBytes []byte, proposerTime time.Time)
 	}, nil
 }
 
-func retrieveTime(pchainBlk block.Block, proposerTime time.Time) (time.Time, error) {
+func retrieveTime(pchainBlk platform.Block, proposerTime time.Time) (time.Time, error) {
 	switch b := pchainBlk.(type) {
 	// Banff blocks serialize pchain time
-	case *block.BanffProposalBlock:
+	case *platform.BanffProposalBlock:
 		return b.Timestamp(), nil
-	case *block.BanffStandardBlock:
+	case *platform.BanffStandardBlock:
 		return b.Timestamp(), nil
-	case *block.BanffAbortBlock:
+	case *platform.BanffAbortBlock:
 		return b.Timestamp(), nil
-	case *block.BanffCommitBlock:
+	case *platform.BanffCommitBlock:
 		return b.Timestamp(), nil
 
 	// Apricot Proposal blocks may contain an advance time tx
 	// setting pchain time
-	case *block.ApricotProposalBlock:
-		if t, ok := b.Tx.Unsigned.(*txs.AdvanceTimeTx); ok {
+	case *platform.ApricotProposalBlock:
+		if t, ok := b.Tx.Unsigned.(*platform.AdvanceTimeTx); ok {
 			return t.Timestamp(), nil
 		}
 
-	case *block.ApricotAtomicBlock,
-		*block.ApricotStandardBlock,
-		*block.ApricotAbortBlock,
-		*block.ApricotCommitBlock:
+	case *platform.ApricotAtomicBlock,
+		*platform.ApricotStandardBlock,
+		*platform.ApricotAbortBlock,
+		*platform.ApricotCommitBlock:
 		// no relevant time information in these blocks
 
 	default:

@@ -13,7 +13,7 @@ import (
 	"github.com/ava-labs/avalanchego/snow"
 	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/ava-labs/avalanchego/vms/platformvm/genesis"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/vms/platformvm/platform"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
@@ -108,7 +108,7 @@ func TestGenesisBlockCreateChainTxs(t *testing.T) {
 
 	g.Txs = g.Txs[(len(g.Txs) - 2):]
 	for _, tx := range g.Txs {
-		castTx := tx.Unsigned.(*txs.CreateChainTx)
+		castTx := tx.Unsigned.(*platform.CreateChainTx)
 		castTx.GenesisData = []byte{}
 	}
 
@@ -126,18 +126,18 @@ func TestGenesisBlockParseTxs(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	pchainClient := client.NewMockPChainClient(ctrl)
 
-	p, err := NewParser(pchainClient, avaconstants.FujiID)
+	p, err := NewParser(pchainClient, avaconstants.CostwoID)
 	require.NoError(err)
 
 	ctx := context.Background()
 	g, err := p.GetGenesisBlock(ctx)
 	require.NoError(err)
 
-	initializeTxCtx(g.Txs, avaconstants.FujiID)
+	initializeTxCtx(g.Txs, avaconstants.CostwoID)
 	j, err := json.MarshalIndent(g, "", "  ")
 	require.NoError(err)
 
-	ret := readFixture("outs/genesis_fuji_txs.json")
+	ret := readFixture("outs/genesis_costwo_txs.json")
 	require.JSONEq(string(ret), string(j))
 }
 
@@ -161,7 +161,7 @@ func TestFixtures(t *testing.T) {
 	}
 }
 
-func initializeTxCtx(txs []*txs.Tx, networkID uint32) {
+func initializeTxCtx(txs []*platform.Tx, networkID uint32) {
 	aliaser := ids.NewAliaser()
 	_ = aliaser.Alias(avaconstants.PlatformChainID, constants.PChain.String())
 	ctx := &snow.Context{
