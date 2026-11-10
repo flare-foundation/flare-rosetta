@@ -16,9 +16,13 @@ fi
 
 if [ "$MODE" = "online" ]; then
 
-    # Wait for go-flare port to bind
-    sleep 30
-    curl ${ROSETTA_FLARE_ENDPOINT} --retry 6 --retry-connrefused --retry-all-errors --connect-timeout 5 --retry-delay 10 --silent --output /dev/null
+    # Wait for go-flare port to bind. No deadline: on a large or freshly
+    # restored database the node can take a long time before it starts serving
+    # HTTP, and exiting here would take the whole container down with it.
+    until curl ${ROSETTA_FLARE_ENDPOINT} --connect-timeout 5 --max-time 10 --silent --output /dev/null; do
+        echo "[rosetta-start-script] go-flare HTTP port not bound yet on network id '$NETWORK_ID', retrying..."
+        sleep 5
+    done
 
     if [ "$START_ROSETTA_SERVER_AFTER_BOOTSTRAP" == "true" ]; then
         while true; do
