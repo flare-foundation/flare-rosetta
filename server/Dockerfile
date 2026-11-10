@@ -1,24 +1,22 @@
 # ------------------------------------------------------------------------------
 # Build go-flare
 # ------------------------------------------------------------------------------
-FROM golang:1.24 AS flare
+FROM golang:1.26.10-trixie@sha256:909771fef53e3dcb0950255f0c9a8b4728c3b841e61509c7b29b098de7ee02d4 AS flare
 
 WORKDIR /app
 
-ARG GO_FLARE_VERSION=v1.14.0
+ARG GO_FLARE_VERSION=v1.15.1
 ARG GO_FLARE_REPO=https://github.com/flare-foundation/go-flare
 
 RUN git clone --branch "$GO_FLARE_VERSION" "${GO_FLARE_REPO}" .
 
-RUN apt update && \
-    apt -y install rsync
 RUN cd avalanchego && \
     ./scripts/build.sh
 
 # ------------------------------------------------------------------------------
 # Build flare-rosetta
 # ------------------------------------------------------------------------------
-FROM golang:1.24 AS rosetta
+FROM golang:1.26.10-trixie@sha256:909771fef53e3dcb0950255f0c9a8b4728c3b841e61509c7b29b098de7ee02d4 AS rosetta
 
 ARG ROSETTA_BRANCH=main
 ARG ROSETTA_SRC=https://github.com/flare-foundation/flare-rosetta/archive/refs/heads/${ROSETTA_BRANCH}.zip
@@ -49,16 +47,16 @@ RUN \
   make build
 
 # ------------------------------------------------------------------------------
-# Target container for running the rosetta server - Ubuntu 22.04
+# Target container for running the rosetta server - Ubuntu 24.04
 # ------------------------------------------------------------------------------
-FROM ubuntu@sha256:ed1544e454989078f5dec1bfdabd8c5cc9c48e0705d07b678ab6ae3fb61952d2
+FROM ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update -y && \
     apt -y upgrade && \
-    apt -y install curl jq netcat dnsutils moreutils
+    apt -y install ca-certificates curl jq netcat-openbsd dnsutils moreutils
 
 WORKDIR /app
 
@@ -79,6 +77,9 @@ ENV HTTP_HOST=0.0.0.0 \
 # Intentionally empty, so env vars are evalueted at runtime (script entrypoint_flare.sh) instead of build time
 # Default: /app/conf/$NETWORK_ID
 ENV CHAIN_CONFIG_DIR=""
+# Default: $DB_DIR/chainData. Since go-flare v1.15.1 (Helicon) the C-chain keeps its execution
+# results here, outside the database; it must be persisted together with DB_DIR.
+ENV CHAIN_DATA_DIR=""
 # Default: warn
 ENV LOG_LEVEL=""
 

@@ -10,6 +10,7 @@ sleep 1
 
 export NETWORK_ID=${NETWORK_ID:?'Env var NETWORK_ID is required! Exiting...'}
 export CHAIN_CONFIG_DIR=${CHAIN_CONFIG_DIR:-/app/conf/${NETWORK_ID}}
+export CHAIN_DATA_DIR=${CHAIN_DATA_DIR:-${DB_DIR}/chainData}
 export LOG_LEVEL=${LOG_LEVEL:-warn}
 
 if [ "$NETWORK_ID" != "flare" ] && [ "$NETWORK_ID" != "costwo" ] && [ "$NETWORK_ID" != "localflare" ]; then
@@ -54,6 +55,7 @@ fi
 	--public-ip="$PUBLIC_IP" \
 	--db-dir="$DB_DIR" \
 	--db-type="$DB_TYPE" \
+	--chain-data-dir="$CHAIN_DATA_DIR" \
 	--bootstrap-ips="$BOOTSTRAP_IPS" \
 	--bootstrap-ids="$BOOTSTRAP_IDS" \
 	--chain-config-dir="$CHAIN_CONFIG_DIR" \

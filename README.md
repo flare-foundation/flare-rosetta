@@ -1,18 +1,18 @@
 # go-flare-rosetta
 
 ## System Requirements
-- go version 1.24
+- go version 1.26.10
 - gcc, g++ and jq
 - CPU: Equivalent of 8 AWS vCPU
 - RAM: 16 GiB
 - Storage: 1TB
-- OS: Ubuntu 22.04 or macOS >= 10.15 (Catalina)
+- OS: Ubuntu 24.04 or macOS >= 10.15 (Catalina)
 
 # Launch a Costwo testnet or Flare mainnet Node
 
 From the `flare-rosetta/` repo, run:
 ```
-git clone https://github.com/flare-foundation/go-flare.git
+git clone --branch v1.15.1 https://github.com/flare-foundation/go-flare.git
 ```
 
 Build the node:
@@ -47,6 +47,20 @@ cd go-flare/avalanchego && ./scripts/build.sh && cd -
     | jq -r ".result.nodeID")" \
     --chain-config-dir=$(pwd)/server/rosetta-cli-conf/flare/
 ```
+
+## C-chain configuration (go-flare v1.15.1 / Helicon)
+
+The C-chain configs in [`server/rosetta-cli-conf/<network>/C/config.json`](./server/rosetta-cli-conf/) are tuned for an archival node as required by Rosetta:
+
+- `apis` is the C-chain JSON-RPC allowlist used after the Helicon upgrade (`eth-apis` is deprecated and only read by the pre-Helicon VM, so both are set). Rosetta requires at least `chain`, `tx`, `txpool`, `trace`, `price` and `avalanche`. See the [C-chain config reference](https://github.com/flare-foundation/go-flare/blob/main/avalanchego/vms/saevm/cchain/config.md).
+- `state-sync-enabled` must be `false` (it defaults to `true` after Helicon) and `pruning-enabled` must be `false`, so the node keeps the full history.
+- `api-max-duration`, if set, must be a duration string (e.g. `"30s"`); numeric values are rejected after Helicon. `commit-interval` must be left at its default.
+
+See the [go-flare release notes](https://github.com/flare-foundation/go-flare/blob/main/RELEASES-flare.md) for details.
+
+## Go dependencies
+
+`server/go.mod` replaces `github.com/ava-labs/avalanchego` (and its `graft/coreth` and `graft/evm` modules) with the matching go-flare release, so Rosetta uses the same P-chain codecs and C-chain header types as the node. Flare's post-Helicon C-chain headers carry an extra `pChainHeight` field; with upstream AvalancheGo the block hashes would be computed incorrectly. When moving to a new go-flare release, update all three `replace` versions together.
 
 # Launch Rosetta
 
@@ -107,6 +121,7 @@ check:data
 | `PUBLIC_IP` | _(empty)_ | The public IP of the service |
 | `DB_DIR` | `/data` | The database directory location |
 | `DB_TYPE` | `leveldb` | The database type to be used |
+| `CHAIN_DATA_DIR` | `${DB_DIR}/chainData` | The chain data directory (`--chain-data-dir`). Since go-flare v1.15.1 (Helicon upgrade) the C-chain keeps its execution results here, outside the database, so it must be persisted together with `DB_DIR`; the default keeps it inside the `/data` mount. A node that loses it cannot start and has to be resynced. |
 | `BOOTSTRAP_IPS` | _(empty)_ | A list of bootstrap server ips; ref [--bootstrap-ips-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ips-string) |
 | `BOOTSTRAP_IDS` | _(empty)_ | A list of bootstrap server ids; ref [--bootstrap-ids-string](https://docs.avax.network/nodes/maintain/avalanchego-config-flags#--bootstrap-ids-string) |
 | `CHAIN_CONFIG_DIR` | `/app/conf/${NETWORK_ID}` | Chain configuration directory for flare |
@@ -134,7 +149,7 @@ check:data
 
 | Default path | Used for | Configurable ? |
 |---|---|---|
-| `/data` | go-flare chain database | With `DB_DIR` env var |
+| `/data` | go-flare chain database (including C-chain data in `/data/chainData`) | With `DB_DIR` (and `CHAIN_DATA_DIR`) env vars |
 | `/app/logs` | go-flare logs | With `LOG_DIR` env var |
 | `/app/flare/config/${NETWORK_ID}` | go-flare configuration folder | With `CHAIN_CONFIG_DIR` env var |
 
@@ -178,7 +193,7 @@ Modify cli config in `server/rosetta-cli-conf/config.json -> construction.offlin
 
 ## Local full integration test
 
-You can use `test-localflare.sh` script. You need bash, node 20, npm, yarn, curl, jq and docker preinstalled.
+You can use `test-localflare.sh` script. You need bash, node 24 (with corepack, used to run the `pnpm` version pinned by go-flare's test-scripts), curl, jq and docker preinstalled.
 
 This script does the following:
 - spins up a 5 node localflare cluster
@@ -190,8 +205,8 @@ This script does the following:
 
 Run with:
 ```
-export=ROSETTA_IMAGE=rosetta-local
-export=START_ROSETTA_SERVER_AFTER_BOOTSTRAP=true
-export=MODE=online
+export ROSETTA_IMAGE=rosetta-local
+export START_ROSETTA_SERVER_AFTER_BOOTSTRAP=true
+export MODE=online
 ./test-localflare.sh
 ```

@@ -10,8 +10,10 @@ MODE="${MODE:-online}"
 ROSETTA_PORT=8080
 CI="${CI:-false}"
 
-if ! command -v npx &> /dev/null; then
-    log_error "npx command not found. Please install Node.js v20, yarn and npm first."
+GO_FLARE_VERSION="${GO_FLARE_VERSION:-v1.15.1}"
+
+if ! command -v corepack &> /dev/null; then
+    echo "corepack command not found. Please install Node.js v24 (it ships corepack, used to run pnpm)." >&2
     exit 1
 fi
 
@@ -86,16 +88,21 @@ log_info "Bootstrapping P-chain using go-flare test scripts..."
 
 # Download the test scripts from go-flare repository
 rm -rf tmp && mkdir tmp
-git clone --depth=1 --branch=v1.14.0 https://github.com/flare-foundation/go-flare.git tmp/go-flare
-npm install -g ts-node
-yarn --cwd "tmp/go-flare/test-scripts"
-yarn --cwd "tmp/go-flare/test-scripts" run p-chain-import
-yarn --cwd "tmp/go-flare/test-scripts" run p-chain-export
+git clone --depth=1 --branch="${GO_FLARE_VERSION}" https://github.com/flare-foundation/go-flare.git tmp/go-flare
+# go-flare test-scripts use pnpm (pinned via the packageManager field); run it through corepack.
+# corepack resolves the pinned version from the current directory, so run from inside test-scripts.
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+(
+  cd tmp/go-flare/test-scripts
+  corepack pnpm install --frozen-lockfile
+  corepack pnpm run p-chain-import
+  corepack pnpm run p-chain-export
+)
 
 # Send a C-chain self-transfer to ensure at least one EVM block is produced.
 # rosetta-cli rejects /network/status if current block timestamp is 0 (genesis).
 cp server/scripts/test-c-chain-warmup.ts tmp/go-flare/test-scripts/src/
-(cd tmp/go-flare/test-scripts && yarn exec ts-node src/test-c-chain-warmup.ts)
+(cd tmp/go-flare/test-scripts && corepack pnpm exec ts-node src/test-c-chain-warmup.ts)
 
 while [[ "$(curl -X POST --data '{ "jsonrpc": "2.0", "method": "platform.getHeight", "params": {}, "id": 1 }' -H 'content-type:application/json;' 127.0.0.1:9650/ext/bc/P | jq -r .result.height)" -lt "2" ]]
 do
